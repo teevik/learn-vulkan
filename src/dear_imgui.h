@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scoped.hpp"
+#include "scoped.h"
 #include <GLFW/glfw3.h>
 
 namespace lvk {

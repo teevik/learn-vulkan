@@ -3,7 +3,7 @@
 #include "dear_imgui.h"
 #include "gpu.h"
 #include "resource_buffering.h"
-#include "scoped_waiter.hpp"
+#include "scoped_waiter.h"
 #include "swapchain.h"
 #include "window.h"
 #include <vulkan/vulkan_handles.hpp>

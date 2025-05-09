@@ -31,6 +31,29 @@ namespace {
 
     return fs::current_path();
   }
+
+  [[nodiscard]] auto get_valid_layers(std::span<char const *const> desired)
+    -> std::vector<char const *> {
+    auto layers = std::vector<char const *>{};
+    layers.reserve(desired.size());
+
+    auto const available = vk::enumerateInstanceLayerProperties();
+
+    for (char const *layer : desired) {
+      auto const pred = [layer = std::string_view{layer}](
+                          vk::LayerProperties const &properties
+                        ) { return properties.layerName == layer; };
+
+      if (std::ranges::find_if(available, pred) == available.end()) {
+        std::println("[lvk] [WARNING] Vulkan Layer '{}' not found", layer);
+        continue;
+      }
+
+      layers.push_back(layer);
+    }
+
+    return layers;
+  }
 } // namespace
 
 namespace lvk {
@@ -55,15 +78,20 @@ namespace lvk {
   }
 
   void App::create_instance() {
-    // auto const loader_version = vk::enumerateInstanceVersion();
-
     auto app_info = vk::ApplicationInfo()
                       .setPApplicationName("Learn Vulkan")
                       .setApiVersion(vk_version);
 
+    static constexpr auto layers = std::array{
+      "VK_LAYER_KHRONOS_shader_object",
+    };
+    auto valid_layers = get_valid_layers(layers);
+
     auto const extensions = glfw::instance_extensions();
+
     auto instance_info = vk::InstanceCreateInfo()
                            .setPApplicationInfo(&app_info)
+                           .setPEnabledLayerNames(valid_layers)
                            .setPEnabledExtensionNames(extensions);
 
     instance = vk::createInstanceUnique(instance_info);
@@ -96,17 +124,25 @@ namespace lvk {
         .setSamplerAnisotropy(gpu.features.samplerAnisotropy)
         .setSampleRateShading(gpu.features.sampleRateShading);
 
-    // extra features that need to be explicitly enabled.
-    auto sync_feature = vk::PhysicalDeviceSynchronization2Features(vk::True);
+    auto shader_object_feature =
+      vk::PhysicalDeviceShaderObjectFeaturesEXT{vk::True};
+
+    // Extra features that need to be explicitly enabled.
     auto dynamic_rendering_feature =
-      vk::PhysicalDeviceDynamicRenderingFeatures{vk::True};
+      vk::PhysicalDeviceDynamicRenderingFeatures{vk::True}.setPNext(
+        &shader_object_feature
+      );
+
     // sync_feature.pNext => dynamic_rendering_feature,
     // and later device_ci.pNext => sync_feature.
     // this is 'pNext chaining'.
-    sync_feature.setPNext(&dynamic_rendering_feature);
+    auto sync_feature =
+      vk::PhysicalDeviceSynchronization2Features(vk::True).setPNext(
+        &dynamic_rendering_feature
+      );
 
     static constexpr auto extensions =
-      std::array{VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+      std::array{VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_EXT_shader_object"};
 
     auto device_info = vk::DeviceCreateInfo()
                          .setPEnabledExtensionNames(extensions)

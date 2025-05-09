@@ -17,6 +17,12 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 find_package(VulkanMemoryAllocator REQUIRED)
+# find_package(VkLayer_khronos_shader_object REQUIRED)
+# find_library(Vulkan_Layer_SHADER_OBJECT
+#         NAMES VkLayer_khronos_shader_object
+#         HINTS
+# )
+# mark_as_advanced(VkLayer_khronos_shader_object)
 
 # declare executable target
 add_executable(${PROJECT_NAME})
@@ -27,6 +33,8 @@ target_link_libraries(${PROJECT_NAME}
     glm::glm
     imgui::imgui
     GPUOpen::VulkanMemoryAllocator
+    # Vulkan_Layer_SHADER_OBJECT
+    # VkLayer_khronos_shader_object
 )
 
 # setup precompiled header

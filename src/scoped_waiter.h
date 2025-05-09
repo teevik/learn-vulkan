@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scoped.hpp"
+#include "scoped.h"
 
 namespace lvk {
   struct ScopedWaiterDeleter {

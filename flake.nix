@@ -31,6 +31,7 @@
 
               vulkan-utility-libraries
               vulkan-validation-layers
+              vulkan-extension-layer
               vulkan-loader
               vulkan-headers
 
@@ -60,10 +61,13 @@
                 vulkan-tools-lunarg
               ];
 
-            VK_LAYER_PATH = pkgs.lib.makeSearchPathOutput "lib" "share/vulkan/explicit_layer.d" [
-              pkgs.vulkan-tools-lunarg # For VK_LAYER_LUNARG_api_dump
-              pkgs.vulkan-validation-layers # For VK_LAYER_KHRONOS_validation
-            ];
+            VK_LAYER_PATH =
+              with pkgs;
+              lib.makeSearchPathOutput "lib" "share/vulkan/explicit_layer.d" [
+                vulkan-tools-lunarg # For VK_LAYER_LUNARG_api_dump
+                vulkan-validation-layers # For VK_LAYER_KHRONOS_validation
+                vulkan-extension-layer # for VK_LAYER_KHRONOS_shader_object
+              ];
           };
         };
     };
