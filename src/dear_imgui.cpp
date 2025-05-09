@@ -20,7 +20,7 @@ namespace lvk {
       throw std::runtime_error{"Failed to initialize Dear ImGui"};
     }
 
-    vk::DescriptorPoolSize pool_sizes[] = {
+    auto pool_sizes = std::initializer_list<vk::DescriptorPoolSize>{
       {vk::DescriptorType::eSampler, 1000},
       {vk::DescriptorType::eCombinedImageSampler, 1000},
       {vk::DescriptorType::eSampledImage, 1000},
@@ -34,24 +34,12 @@ namespace lvk {
       {vk::DescriptorType::eInputAttachment, 1000}
     };
 
-    // VkDescriptorPoolCreateInfo pool_info = {
-    //   .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-    //   .pNext = nullptr,
-    //   .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-    //   .maxSets = 1000,
-    //   .poolSizeCount = std::size(pool_sizes),
-    //   .pPoolSizes = pool_sizes
-    // };
-
     auto pool_info =
       vk::DescriptorPoolCreateInfo()
         .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
         .setMaxSets(1000)
         .setPoolSizes(pool_sizes);
 
-    // auto descriptor_pool =
-    //   vk::UniqueDescriptorPool(create_info.device, &pool_info);
-    // vk::UniqueDescriptorPool descriptor_pool(create_info.device, &pool_info);
     descriptor_pool = create_info.device.createDescriptorPoolUnique(pool_info);
 
     auto pipline_rendering_info =

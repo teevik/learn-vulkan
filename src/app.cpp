@@ -36,6 +36,7 @@ namespace {
 namespace lvk {
   void App::run() {
     assets_dir = locate_assets_dir();
+    std::println("[lvk] Using assets directory: {}", assets_dir.string());
 
     create_window();
     create_instance();

@@ -16,8 +16,11 @@
 
       perSystem =
         { pkgs, ... }:
+        let
+          mkShell = pkgs.mkShell.override { stdenv = pkgs.clangStdenv; };
+        in
         {
-          devShells.default = pkgs.mkShell {
+          devShells.default = mkShell {
             packages = with pkgs; [
               pkg-config
               cmake
@@ -31,8 +34,6 @@
               vulkan-loader
               vulkan-headers
 
-              # simdjson
-              # SDL2
               glfw
               glm
               (imgui.override {
@@ -55,18 +56,6 @@
             LD_LIBRARY_PATH =
               with pkgs;
               lib.makeLibraryPath [
-                stdenv.cc.cc
-
-                # # vulkan-validation-layers
-                # vulkan-headers
-                # wayland
-                # vulkan-loader
-                # xorg.libX11
-                # xorg.libXcursor
-                # xorg.libXi
-                # xorg.libXrandr
-                # libxkbcommon
-
                 vulkan-loader
                 vulkan-tools-lunarg
               ];
@@ -75,7 +64,6 @@
               pkgs.vulkan-tools-lunarg # For VK_LAYER_LUNARG_api_dump
               pkgs.vulkan-validation-layers # For VK_LAYER_KHRONOS_validation
             ];
-
           };
         };
     };
