@@ -1,0 +1,74 @@
+[
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Debug\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -g -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Winvalid-pch -x c++-header -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Debug/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Debug/cmake_pch.hxx.gch -c /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/cmake_pch.hxx.cxx",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/cmake_pch.hxx.cxx",
+  "output": "CMakeFiles/learn-vk.dir/Debug/cmake_pch.hxx.gch"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Debug\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -g -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Debug/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Debug/src/app.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/app.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/app.cpp",
+  "output": "CMakeFiles/learn-vk.dir/Debug/src/app.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Debug\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -g -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Debug/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Debug/src/main.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/main.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/main.cpp",
+  "output": "CMakeFiles/learn-vk.dir/Debug/src/main.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Debug\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -g -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Debug/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Debug/src/window.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/window.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/window.cpp",
+  "output": "CMakeFiles/learn-vk.dir/Debug/src/window.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Release\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O3 -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -x c++-header -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Release/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Release/cmake_pch.hxx.gch -c /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/cmake_pch.hxx.cxx",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/cmake_pch.hxx.cxx",
+  "output": "CMakeFiles/learn-vk.dir/Release/cmake_pch.hxx.gch"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Release\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O3 -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Release/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Release/src/app.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/app.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/app.cpp",
+  "output": "CMakeFiles/learn-vk.dir/Release/src/app.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Release\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O3 -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Release/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Release/src/main.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/main.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/main.cpp",
+  "output": "CMakeFiles/learn-vk.dir/Release/src/main.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"Release\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O3 -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/Release/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/Release/src/window.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/window.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/window.cpp",
+  "output": "CMakeFiles/learn-vk.dir/Release/src/window.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O2 -g -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -x c++-header -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/RelWithDebInfo/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/RelWithDebInfo/cmake_pch.hxx.gch -c /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/cmake_pch.hxx.cxx",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/cmake_pch.hxx.cxx",
+  "output": "CMakeFiles/learn-vk.dir/RelWithDebInfo/cmake_pch.hxx.gch"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O2 -g -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/RelWithDebInfo/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/RelWithDebInfo/src/app.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/app.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/app.cpp",
+  "output": "CMakeFiles/learn-vk.dir/RelWithDebInfo/src/app.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O2 -g -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/RelWithDebInfo/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/RelWithDebInfo/src/main.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/main.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/main.cpp",
+  "output": "CMakeFiles/learn-vk.dir/RelWithDebInfo/src/main.cpp.o"
+},
+{
+  "directory": "/home/teevik/Documents/Projects/learn-vulkan/build",
+  "command": "/nix/store/dc6bahp3f5af2rxz3pal9m3kp4vx4rpy-gcc-wrapper-14.2.1.20250322/bin/g++ -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" -I/home/teevik/Documents/Projects/learn-vulkan/src -O2 -g -DNDEBUG -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type -Werror -Winvalid-pch -include /home/teevik/Documents/Projects/learn-vulkan/build/CMakeFiles/learn-vk.dir/RelWithDebInfo/cmake_pch.hxx -o CMakeFiles/learn-vk.dir/RelWithDebInfo/src/window.cpp.o -c /home/teevik/Documents/Projects/learn-vulkan/src/window.cpp",
+  "file": "/home/teevik/Documents/Projects/learn-vulkan/src/window.cpp",
+  "output": "CMakeFiles/learn-vk.dir/RelWithDebInfo/src/window.cpp.o"
+}
+]
