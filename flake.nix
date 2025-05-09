@@ -43,6 +43,7 @@
               xorg.libXinerama
 
               vulkan-tools-lunarg
+              renderdoc
             ];
 
             VULKAN_SDK = "${pkgs.vulkan-headers}";

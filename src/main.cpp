@@ -2,6 +2,8 @@
 #include <print>
 
 auto main() -> int {
+  glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+
   try {
     lvk::App{}.run();
   } catch (std::exception const &e) {
