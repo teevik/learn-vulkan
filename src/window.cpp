@@ -31,4 +31,23 @@ namespace lvk::glfw {
     }
     return window;
   }
-}
+
+  auto instance_extensions() -> std::span<char const *const> {
+    auto count = std::uint32_t{};
+    auto const *extensions = glfwGetRequiredInstanceExtensions(&count);
+    return {extensions, static_cast<std::size_t>(count)};
+  }
+
+  auto create_surface(GLFWwindow *window, vk::Instance const instance)
+    -> vk::UniqueSurfaceKHR {
+    auto *surface = VkSurfaceKHR{};
+
+    auto const result =
+      glfwCreateWindowSurface(instance, window, nullptr, &surface);
+    if (result != VK_SUCCESS || surface == VkSurfaceKHR{}) {
+      throw std::runtime_error{"Failed to create Vulkan Surface"};
+    }
+
+    return vk::UniqueSurfaceKHR{surface, instance};
+  }
+} // namespace lvk::glfw

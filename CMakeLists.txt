@@ -12,6 +12,7 @@ set(CMAKE_DEBUG_POSTFIX "-d")
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
@@ -21,6 +22,7 @@ find_package(VulkanMemoryAllocator REQUIRED)
 add_executable(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
+    Vulkan::Vulkan
     glfw
     glm::glm
     imgui::imgui
