@@ -35,7 +35,11 @@
               # SDL2
               glfw
               glm
-              imgui
+              (imgui.override {
+                IMGUI_BUILD_GLFW_BINDING = true;
+                IMGUI_BUILD_VULKAN_BINDING = true;
+                IMGUI_BUILD_OPENGL3_BINDING = false;
+              })
               vulkan-memory-allocator
 
               xorg.libX11.dev

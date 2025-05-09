@@ -155,6 +155,10 @@ namespace lvk {
     };
   }
 
+  auto Swapchain::get_format() const -> vk::Format {
+    return swapchain_create_info.imageFormat;
+  }
+
   void Swapchain::populate_images() {
     // we use the more verbose two-call API to avoid assigning `images` to a new
     // vector on every call.

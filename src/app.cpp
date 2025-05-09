@@ -3,6 +3,7 @@
 #include "window.h"
 #include <vulkan/vulkan_structs.hpp>
 #include <chrono>
+#include <imgui.h>
 #include <print>
 #include <ranges>
 
@@ -17,6 +18,7 @@ namespace lvk {
     create_device();
     create_swapchain();
     create_render_sync();
+    create_imgui();
 
     main_loop();
   }
@@ -92,6 +94,22 @@ namespace lvk {
     queue = device->getQueue(gpu.queue_family, queue_index);
   }
 
+  void App::create_imgui() {
+    auto const imgui_info = DearImGui::CreateInfo{
+      .window = window.get(),
+      .api_version = vk_version,
+      .instance = *instance,
+      .physical_device = gpu.device,
+      .queue_family = gpu.queue_family,
+      .device = *device,
+      .queue = queue,
+      .color_format = swapchain->get_format(),
+      .samples = vk::SampleCountFlagBits::e1,
+    };
+
+    imgui.emplace(imgui_info);
+  };
+
   void App::main_loop() {
     while (glfwWindowShouldClose(window.get()) == GLFW_FALSE) {
       glfwPollEvents();
@@ -135,6 +153,7 @@ namespace lvk {
     // Reset fence _after_ acquisition of image: if it fails, the
     // fence remains signaled.
     device->resetFences(*current_render_sync.drawn);
+    imgui->new_frame();
 
     return true;
   }
@@ -231,9 +250,27 @@ namespace lvk {
                             .setLayerCount(1);
 
     command_buffer.beginRendering(rendering_info);
+    // ImGui::ShowDemoWindow();
+
+    ImGui::Text(
+      "Application average %.3f ms/frame (%.1f FPS)",
+      1000.0f / ImGui::GetIO().Framerate,
+      ImGui::GetIO().Framerate
+    );
 
     // TODO(teevik): draw stuff here
 
+    command_buffer.endRendering();
+
+    imgui->end_frame();
+
+    // We don't want to clear the image again, instead load it intact after the
+    // previous pass.
+    color_attachment.setLoadOp(vk::AttachmentLoadOp::eLoad);
+    rendering_info.setColorAttachments(color_attachment)
+      .setPDepthAttachment(nullptr);
+    command_buffer.beginRendering(rendering_info);
+    imgui->render(command_buffer);
     command_buffer.endRendering();
   }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dear_imgui.h"
 #include "gpu.h"
 #include "resource_buffering.h"
 #include "scoped_waiter.hpp"
@@ -38,6 +39,7 @@ namespace lvk {
 
     glm::ivec2 framebuffer_size{};
     std::optional<RenderTarget> render_target;
+    std::optional<DearImGui> imgui;
 
     ScopedWaiter waiter;
 
@@ -48,6 +50,7 @@ namespace lvk {
     void create_device();
     void create_swapchain();
     void create_render_sync();
+    void create_imgui();
 
     void main_loop();
 

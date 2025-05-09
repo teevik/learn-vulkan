@@ -20,6 +20,9 @@ namespace lvk {
     auto get_size() const -> glm::ivec2;
 
     [[nodiscard]]
+    auto get_format() const -> vk::Format;
+
+    [[nodiscard]]
     auto acquire_next_image(vk::Semaphore to_signal)
       -> std::optional<RenderTarget>;
 
