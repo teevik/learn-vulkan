@@ -35,6 +35,7 @@ namespace lvk {
 
     State state{};
 
+    vk::UniqueDescriptorPool descriptor_pool;
     Scoped<vk::Device, Deleter> device;
   };
 } // namespace lvk

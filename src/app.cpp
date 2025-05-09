@@ -9,8 +9,34 @@
 
 using namespace std::chrono_literals;
 
+namespace {
+  [[nodiscard]] auto locate_assets_dir() -> fs::path {
+    // Look for '<path>/assets/', starting from the working
+    // directory and walking up the parent directory tree.
+    static constexpr std::string_view dir_name{"assets"};
+
+    for (auto path = fs::current_path();
+         !path.empty() && path.has_parent_path();
+         path = path.parent_path()) {
+
+      // Exit early if path is "/"
+      if (path == fs::path("/")) break;
+
+      auto assets_dir = path / dir_name;
+
+      if (fs::is_directory(assets_dir)) return assets_dir;
+    }
+
+    std::println("[lvk] Warning: could not locate '{}' directory", dir_name);
+
+    return fs::current_path();
+  }
+} // namespace
+
 namespace lvk {
   void App::run() {
+    assets_dir = locate_assets_dir();
+
     create_window();
     create_instance();
     create_surface();

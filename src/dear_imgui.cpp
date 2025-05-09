@@ -4,6 +4,9 @@
 #include <glm/mat4x4.hpp>
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
+#include <vulkan/vulkan_structs.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
@@ -17,33 +20,39 @@ namespace lvk {
       throw std::runtime_error{"Failed to initialize Dear ImGui"};
     }
 
-    VkDescriptorPoolSize pool_sizes[] = {
-      {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-      {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-      {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-      {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-      {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
+    vk::DescriptorPoolSize pool_sizes[] = {
+      {vk::DescriptorType::eSampler, 1000},
+      {vk::DescriptorType::eCombinedImageSampler, 1000},
+      {vk::DescriptorType::eSampledImage, 1000},
+      {vk::DescriptorType::eStorageImage, 1000},
+      {vk::DescriptorType::eUniformTexelBuffer, 1000},
+      {vk::DescriptorType::eStorageTexelBuffer, 1000},
+      {vk::DescriptorType::eUniformBuffer, 1000},
+      {vk::DescriptorType::eStorageBuffer, 1000},
+      {vk::DescriptorType::eUniformBufferDynamic, 1000},
+      {vk::DescriptorType::eStorageBufferDynamic, 1000},
+      {vk::DescriptorType::eInputAttachment, 1000}
     };
 
-    VkDescriptorPoolCreateInfo pool_info = {
-      .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-      .pNext = nullptr,
-      .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
-      .maxSets = 1000,
-      .poolSizeCount = std::size(pool_sizes),
-      .pPoolSizes = pool_sizes
-    };
+    // VkDescriptorPoolCreateInfo pool_info = {
+    //   .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    //   .pNext = nullptr,
+    //   .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+    //   .maxSets = 1000,
+    //   .poolSizeCount = std::size(pool_sizes),
+    //   .pPoolSizes = pool_sizes
+    // };
 
-    VkDescriptorPool descriptor_pool;
-    vkCreateDescriptorPool(
-      create_info.device, &pool_info, nullptr, &descriptor_pool
-    );
+    auto pool_info =
+      vk::DescriptorPoolCreateInfo()
+        .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+        .setMaxSets(1000)
+        .setPoolSizes(pool_sizes);
+
+    // auto descriptor_pool =
+    //   vk::UniqueDescriptorPool(create_info.device, &pool_info);
+    // vk::UniqueDescriptorPool descriptor_pool(create_info.device, &pool_info);
+    descriptor_pool = create_info.device.createDescriptorPoolUnique(pool_info);
 
     auto pipline_rendering_info =
       vk::PipelineRenderingCreateInfo()
@@ -56,7 +65,7 @@ namespace lvk {
       .Device = create_info.device,
       .QueueFamily = create_info.queue_family,
       .Queue = create_info.queue,
-      .DescriptorPool = descriptor_pool,
+      .DescriptorPool = descriptor_pool.get(),
       .RenderPass = {},
       .MinImageCount = 2,
       .ImageCount = static_cast<std::uint32_t>(resource_buffering),

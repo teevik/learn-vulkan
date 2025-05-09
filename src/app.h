@@ -7,6 +7,9 @@
 #include "swapchain.h"
 #include "window.h"
 #include <vulkan/vulkan_handles.hpp>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace lvk {
   class App {
@@ -21,6 +24,8 @@ namespace lvk {
       /// Used to record rendering commands
       vk::CommandBuffer command_buffer;
     };
+
+    fs::path assets_dir;
 
     glfw::Window window;
     vk::UniqueInstance instance;
