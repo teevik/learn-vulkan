@@ -11,6 +11,7 @@ namespace lvk {
     create_surface();
     select_gpu();
     create_device();
+    create_swapchain();
 
     main_loop();
   }
@@ -90,5 +91,11 @@ namespace lvk {
     while (glfwWindowShouldClose(window.get()) == GLFW_FALSE) {
       glfwPollEvents();
     }
+  }
+
+  void App::create_swapchain() {
+    auto const size = glfw::framebuffer_size(window.get());
+
+    swapchain.emplace(*device, gpu, *surface, size);
   }
 } // namespace lvk

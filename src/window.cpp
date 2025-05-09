@@ -50,4 +50,11 @@ namespace lvk::glfw {
 
     return vk::UniqueSurfaceKHR{surface, instance};
   }
+
+  auto framebuffer_size(GLFWwindow *window) -> glm::ivec2 {
+    auto size = glm::ivec2{};
+    glfwGetFramebufferSize(window, &size.x, &size.y);
+
+    return size;
+  }
 } // namespace lvk::glfw

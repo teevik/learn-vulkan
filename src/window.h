@@ -19,4 +19,6 @@ namespace lvk::glfw {
 
   auto create_surface(GLFWwindow *window, vk::Instance instance)
     -> vk::UniqueSurfaceKHR;
+
+  auto framebuffer_size(GLFWwindow *window) -> glm::ivec2;
 } // namespace lvk::glfw

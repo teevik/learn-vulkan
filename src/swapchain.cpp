@@ -1,5 +1,6 @@
 #include "swapchain.h"
 #include <vulkan/vulkan_structs.hpp>
+#include <print>
 
 namespace {
   constexpr auto srgb_formats_v = std::array{
@@ -59,6 +60,12 @@ namespace {
       min_images_v, capabilities.minImageCount, capabilities.maxImageCount
     );
   }
+
+  void require_success(vk::Result const result, char const *error_msg) {
+    if (result != vk::Result::eSuccess) {
+      throw std::runtime_error{error_msg};
+    }
+  }
 } // namespace
 
 namespace lvk {
@@ -95,10 +102,12 @@ namespace lvk {
 
     auto const capabilities =
       gpu.device.getSurfaceCapabilitiesKHR(swapchain_create_info.surface);
+
     swapchain_create_info.setImageExtent(get_image_extent(capabilities, size))
       .setMinImageCount(get_image_count(capabilities))
       .setOldSwapchain(swapchain ? *swapchain : vk::SwapchainKHR{})
       .setQueueFamilyIndices(gpu.queue_family);
+
     assert(
       swapchain_create_info.imageExtent.width > 0 &&
       swapchain_create_info.imageExtent.height > 0 &&
@@ -109,6 +118,11 @@ namespace lvk {
     device.waitIdle();
     swapchain = device.createSwapchainKHRUnique(swapchain_create_info);
 
+    populate_images();
+    create_image_views();
+
+    size = get_size();
+    std::println("[lvk] Swapchain [{}x{}]", size.x, size.y);
     return true;
   }
 
@@ -117,5 +131,41 @@ namespace lvk {
       swapchain_create_info.imageExtent.width,
       swapchain_create_info.imageExtent.height
     };
+  }
+
+  void Swapchain::populate_images() {
+    // we use the more verbose two-call API to avoid assigning `images` to a new
+    // vector on every call.
+    auto image_count = std::uint32_t{};
+    auto result =
+      device.getSwapchainImagesKHR(*swapchain, &image_count, nullptr);
+    require_success(result, "Failed to get Swapchain Images");
+
+    images.resize(image_count);
+    result =
+      device.getSwapchainImagesKHR(*swapchain, &image_count, images.data());
+    require_success(result, "Failed to get Swapchain Images");
+  }
+
+  void Swapchain::create_image_views() {
+    // this is a color image with 1 layer and 1 mip-level (the default).
+    auto subresource_range = vk::ImageSubresourceRange()
+                               .setAspectMask(vk::ImageAspectFlagBits::eColor)
+                               .setLayerCount(1)
+                               .setLevelCount(1);
+
+    // set common parameters here (everything except the Image).
+    auto image_view_info = vk::ImageViewCreateInfo()
+                             .setViewType(vk::ImageViewType::e2D)
+                             .setFormat(swapchain_create_info.imageFormat)
+                             .setSubresourceRange(subresource_range);
+
+    image_views.clear();
+    image_views.reserve(images.size());
+
+    for (auto const image : images) {
+      image_view_info.setImage(image);
+      image_views.push_back(device.createImageViewUnique(image_view_info));
+    }
   }
 } // namespace lvk
