@@ -1,6 +1,8 @@
 #include "window.h"
 #include <print>
 
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+
 namespace lvk::glfw {
   void Deleter::operator()(GLFWwindow *window) const noexcept {
     glfwDestroyWindow(window);

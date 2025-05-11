@@ -13,6 +13,8 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(ext)
+add_subdirectory(framework)
+
 # find_package(Vulkan REQUIRED)
 # find_package(glfw3 REQUIRED)
 # find_package(glm REQUIRED)
@@ -30,6 +32,7 @@ add_executable(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
     learn-vk::ext
+    learn-vk::framework
     # Vulkan::Vulkan
     # glfw
     # glm::glm

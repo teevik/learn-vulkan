@@ -1,8 +1,7 @@
 #include "app.h"
-#include "gpu.h"
 #include "vertex.h"
-#include "vma.h"
-#include "window.h"
+#include "framework/gpu.h"
+#include "framework/vma.h"
 #include <vulkan/vulkan_structs.hpp>
 #include <chrono>
 #include <format>
@@ -10,8 +9,6 @@
 #include <imgui.h>
 #include <print>
 #include <ranges>
-
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace {
   template <typename T> [[nodiscard]] constexpr auto to_byte_array(T const &t) {
@@ -536,6 +533,7 @@ namespace lvk {
         shader->polygon_mode =
           wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
       }
+
       if (wireframe) {
         auto const &line_width_range = gpu.properties.limits.lineWidthRange;
         ImGui::SetNextItemWidth(100.0f);

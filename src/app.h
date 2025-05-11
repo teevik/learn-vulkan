@@ -1,13 +1,13 @@
 #pragma once
 
-#include "dear_imgui.h"
-#include "gpu.h"
-#include "resource_buffering.h"
-#include "scoped_waiter.h"
-#include "shader_program.h"
-#include "swapchain.h"
-#include "vma.h"
-#include "window.h"
+#include "framework/dear_imgui.h"
+#include "framework/gpu.h"
+#include "framework/resource_buffering.h"
+#include "framework/scoped_waiter.h"
+#include "framework/shader_program.h"
+#include "framework/swapchain.h"
+#include "framework/vma.h"
+#include "framework/window.h"
 #include <vulkan/vulkan_handles.hpp>
 #include <filesystem>
 

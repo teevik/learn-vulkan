@@ -1,5 +1,5 @@
 #include "dear_imgui.h"
-#include "app.h"
+#include "resource_buffering.h"
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <glm/gtc/color_space.hpp>
