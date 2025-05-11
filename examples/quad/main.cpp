@@ -1,3 +1,4 @@
+#include "imgui.h"
 #include "framework/assets.h"
 #include "framework/command_block.h"
 #include "framework/renderer.h"
@@ -115,23 +116,47 @@ auto main() -> int {
     create_shader(app, assets_dir / "vert.spv", assets_dir / "frag.spv");
   auto vertex_buffer = create_vertex_buffer(app);
 
-  auto draw =
-    [&app, &shader, &vertex_buffer](vk::CommandBuffer const command_buffer) {
-      shader.bind(command_buffer, app.framebuffer_size);
+  auto use_wireframe = false;
 
-      // Single VBO at binding 0 at no offset
-      command_buffer.bindVertexBuffers(
-        0, vertex_buffer.get().buffer, vk::DeviceSize{}
-      );
+  auto draw = [&app, &shader, &vertex_buffer, &use_wireframe](
+                vk::CommandBuffer const command_buffer
+              ) {
+    ImGui::SetNextWindowSize({200.0f, 100.0f}, ImGuiCond_Once);
+    if (ImGui::Begin("Inspect")) {
+      if (ImGui::Checkbox("wireframe", &use_wireframe)) {
+        shader.polygon_mode =
+          use_wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
+      }
 
-      // u32 indices after offset of 4 vertices
-      command_buffer.bindIndexBuffer(
-        vertex_buffer.get().buffer, 4 * sizeof(Vertex), vk::IndexType::eUint32
-      );
+      if (use_wireframe) {
+        auto const &line_width_range = app.gpu.properties.limits.lineWidthRange;
+        ImGui::SetNextItemWidth(100.0f);
+        ImGui::DragFloat(
+          "line width",
+          &shader.line_width,
+          0.25f,
+          line_width_range[0],
+          line_width_range[1]
+        );
+      }
+    }
+    ImGui::End();
 
-      // command_buffer.draw(3, 1, 0, 0);
-      command_buffer.drawIndexed(6, 1, 0, 0, 0);
-    };
+    shader.bind(command_buffer, app.framebuffer_size);
+
+    // Single VBO at binding 0 at no offset
+    command_buffer.bindVertexBuffers(
+      0, vertex_buffer.get().buffer, vk::DeviceSize{}
+    );
+
+    // u32 indices after offset of 4 vertices
+    command_buffer.bindIndexBuffer(
+      vertex_buffer.get().buffer, 4 * sizeof(Vertex), vk::IndexType::eUint32
+    );
+
+    // command_buffer.draw(3, 1, 0, 0);
+    command_buffer.drawIndexed(6, 1, 0, 0, 0);
+  };
 
   app.run(draw);
 }

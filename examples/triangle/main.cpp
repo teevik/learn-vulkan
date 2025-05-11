@@ -1,4 +1,3 @@
-#include "imgui.h"
 #include "framework/assets.h"
 #include "framework/renderer.h"
 #include "framework/shader_program.h"
@@ -92,38 +91,15 @@ auto main() -> int {
   auto shader =
     create_shader(app, assets_dir / "vert.spv", assets_dir / "frag.spv");
   auto vertex_buffer = create_vertex_buffer(app);
-  auto use_wireframe = false;
 
-  auto draw = [&app, &shader, &vertex_buffer, &use_wireframe](
-                vk::CommandBuffer const command_buffer
-              ) {
-    ImGui::SetNextWindowSize({200.0f, 100.0f}, ImGuiCond_Once);
-    if (ImGui::Begin("Inspect")) {
-      if (ImGui::Checkbox("wireframe", &use_wireframe)) {
-        shader.polygon_mode =
-          use_wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
-      }
-
-      if (use_wireframe) {
-        auto const &line_width_range = app.gpu.properties.limits.lineWidthRange;
-        ImGui::SetNextItemWidth(100.0f);
-        ImGui::DragFloat(
-          "line width",
-          &shader.line_width,
-          0.25f,
-          line_width_range[0],
-          line_width_range[1]
-        );
-      }
-    }
-    ImGui::End();
-
-    shader.bind(command_buffer, app.framebuffer_size);
-    command_buffer.bindVertexBuffers(
-      0, vertex_buffer.get().buffer, vk::DeviceSize{}
-    );
-    command_buffer.draw(3, 1, 0, 0);
-  };
+  auto draw =
+    [&app, &shader, &vertex_buffer](vk::CommandBuffer const command_buffer) {
+      shader.bind(command_buffer, app.framebuffer_size);
+      command_buffer.bindVertexBuffers(
+        0, vertex_buffer.get().buffer, vk::DeviceSize{}
+      );
+      command_buffer.draw(3, 1, 0, 0);
+    };
 
   app.run(draw);
 }

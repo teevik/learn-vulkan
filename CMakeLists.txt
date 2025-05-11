@@ -11,7 +11,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_DEBUG_POSTFIX "-d")
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${PROJECT_SOURCE_DIR}/bin>)
 
 add_subdirectory(ext)
@@ -19,59 +18,3 @@ add_subdirectory(framework)
 
 add_subdirectory(examples/triangle)
 add_subdirectory(examples/quad)
-
-# find_package(Vulkan REQUIRED)
-# find_package(glfw3 REQUIRED)
-# find_package(glm REQUIRED)
-# find_package(imgui REQUIRED)
-# find_package(VulkanMemoryAllocator REQUIRED)
-# find_package(VkLayer_khronos_shader_object REQUIRED)
-# find_library(Vulkan_Layer_SHADER_OBJECT
-#         NAMES VkLayer_khronos_shader_object
-#         HINTS
-# )
-# mark_as_advanced(VkLayer_khronos_shader_object)
-
-# declare executable target
-# add_executable(${PROJECT_NAME})
-
-# target_link_libraries(${PROJECT_NAME}
-#     learn-vk::ext
-#     learn-vk::framework
-#     # Vulkan::Vulkan
-#     # glfw
-#     # glm::glm
-#     # imgui::imgui
-#     # GPUOpen::VulkanMemoryAllocator
-#     # Vulkan_Layer_SHADER_OBJECT
-#     # VkLayer_khronos_shader_object
-# )
-
-# setup precompiled header
-# target_precompile_headers(${PROJECT_NAME} PRIVATE
-#   <glm/glm.hpp>
-#   <vulkan/vulkan.hpp>
-# )
-
-# # enable including headers in 'src/'
-# target_include_directories(${PROJECT_NAME} PRIVATE
-#   src
-# )
-
-# # add all source files in 'src/' to target
-# file(GLOB_RECURSE sources LIST_DIRECTORIES false "src/*.[hc]pp")
-# target_sources(${PROJECT_NAME} PRIVATE
-#   ${sources}
-# )
-
-# # setup compiler warnings
-# if(CMAKE_CXX_COMPILER_ID STREQUAL Clang OR CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-#     target_compile_options(${PROJECT_NAME} PRIVATE
-#     -Wall -Wextra -Wpedantic -Wconversion -Werror=return-type
-#     $<$<NOT:$<CONFIG:Debug>>:-Werror> # warnings as errors if not Debug
-#   )
-# elseif(CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
-#     target_compile_options(${PROJECT_NAME} PRIVATE
-#     $<$<NOT:$<CONFIG:Debug>>:/WX> # warnings as errors if not Debug
-#   )
-# endif()
