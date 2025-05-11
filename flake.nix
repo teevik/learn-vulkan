@@ -44,12 +44,19 @@
               })
               vulkan-memory-allocator
 
-              xorg.libX11.dev
+              wayland-scanner
+              wayland
+              libxkbcommon
+              xorg.libX11
+              xorg.libXcursor
+              xorg.libXi
+              xorg.libXrandr
               xorg.libXft
               xorg.libXinerama
 
               vulkan-tools-lunarg
               renderdoc
+              glslang
             ];
 
             VULKAN_SDK = "${pkgs.vulkan-headers}";
@@ -59,15 +66,21 @@
               lib.makeLibraryPath [
                 vulkan-loader
                 vulkan-tools-lunarg
+                xorg.libX11
+                wayland
               ];
 
             VK_LAYER_PATH =
               with pkgs;
-              lib.makeSearchPathOutput "lib" "share/vulkan/explicit_layer.d" [
+              (lib.makeSearchPathOutput "lib" "share/vulkan/explicit_layer.d" [
                 vulkan-tools-lunarg # For VK_LAYER_LUNARG_api_dump
                 vulkan-validation-layers # For VK_LAYER_KHRONOS_validation
                 vulkan-extension-layer # for VK_LAYER_KHRONOS_shader_object
-              ];
+              ])
+              + ":"
+              + (lib.makeSearchPathOutput "lib" "share/vulkan/implicit_layer.d" [
+                renderdoc
+              ]);
           };
         };
     };

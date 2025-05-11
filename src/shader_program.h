@@ -24,23 +24,22 @@ namespace lvk {
       DepthTest = 1 << 1, // turn on depth write and test.
     };
 
-    static constexpr auto color_blend_equation = [] {
-      auto ret = vk::ColorBlendEquationEXT{};
-      ret
+    static constexpr auto color_blend_function = [] {
+      // Standard alpha blending:
+      // (alpha * src) + (1 - alpha) * dst
+
+      return vk::ColorBlendEquationEXT()
         .setColorBlendOp(vk::BlendOp::eAdd)
-        // standard alpha blending:
-        // (alpha * src) + (1 - alpha) * dst
         .setSrcColorBlendFactor(vk::BlendFactor::eSrcAlpha)
         .setDstColorBlendFactor(vk::BlendFactor::eOneMinusSrcAlpha);
-      return ret;
     }();
-
-    static constexpr auto flags = AlphaBlend | DepthTest;
 
     vk::PrimitiveTopology topology{vk::PrimitiveTopology::eTriangleList};
     vk::PolygonMode polygon_mode{vk::PolygonMode::eFill};
     float line_width{1.0f};
+    vk::ColorBlendEquationEXT color_blend_equation{color_blend_function};
     vk::CompareOp depth_compare_op{vk::CompareOp::eLessOrEqual};
+    std::uint8_t flags = AlphaBlend | DepthTest;
 
     using CreateInfo = ShaderProgramCreateInfo;
 

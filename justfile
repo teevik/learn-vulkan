@@ -1,4 +1,8 @@
-build:
+[working-directory('assets')]
+shaders:
+    glslang -g --target-env "vulkan1.3" -V shader.vert shader.frag
+
+build: shaders
     cmake -G "Ninja Multi-Config" -S . -B build/
     ninja -C build/
     cp ./build/compile_commands.json .

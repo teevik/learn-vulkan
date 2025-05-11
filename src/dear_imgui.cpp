@@ -1,5 +1,7 @@
 #include "dear_imgui.h"
 #include "app.h"
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
 #include <glm/gtc/color_space.hpp>
 #include <glm/mat4x4.hpp>
 #include <vulkan/vulkan.hpp>
@@ -8,39 +10,25 @@
 #include <vulkan/vulkan_handles.hpp>
 #include <vulkan/vulkan_structs.hpp>
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
 
 namespace lvk {
   DearImGui::DearImGui(CreateInfo const &create_info) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
+    static auto const load_vk_func = +[](char const *name, void *user_data) {
+      return VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr(
+        *static_cast<vk::Instance *>(user_data), name
+      );
+    };
+    auto instance = create_info.instance;
+    ImGui_ImplVulkan_LoadFunctions(
+      create_info.api_version, load_vk_func, &instance
+    );
+
     if (!ImGui_ImplGlfw_InitForVulkan(create_info.window, true)) {
       throw std::runtime_error{"Failed to initialize Dear ImGui"};
     }
-
-    auto pool_sizes = std::initializer_list<vk::DescriptorPoolSize>{
-      {vk::DescriptorType::eSampler, 1000},
-      {vk::DescriptorType::eCombinedImageSampler, 1000},
-      {vk::DescriptorType::eSampledImage, 1000},
-      {vk::DescriptorType::eStorageImage, 1000},
-      {vk::DescriptorType::eUniformTexelBuffer, 1000},
-      {vk::DescriptorType::eStorageTexelBuffer, 1000},
-      {vk::DescriptorType::eUniformBuffer, 1000},
-      {vk::DescriptorType::eStorageBuffer, 1000},
-      {vk::DescriptorType::eUniformBufferDynamic, 1000},
-      {vk::DescriptorType::eStorageBufferDynamic, 1000},
-      {vk::DescriptorType::eInputAttachment, 1000}
-    };
-
-    auto pool_info =
-      vk::DescriptorPoolCreateInfo()
-        .setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-        .setMaxSets(1000)
-        .setPoolSizes(pool_sizes);
-
-    descriptor_pool = create_info.device.createDescriptorPoolUnique(pool_info);
 
     auto pipline_rendering_info =
       vk::PipelineRenderingCreateInfo()
@@ -48,18 +36,20 @@ namespace lvk {
         .setColorAttachmentFormats(create_info.color_format);
 
     auto init_info = ImGui_ImplVulkan_InitInfo{
+      .ApiVersion = create_info.api_version,
       .Instance = create_info.instance,
       .PhysicalDevice = create_info.physical_device,
       .Device = create_info.device,
       .QueueFamily = create_info.queue_family,
       .Queue = create_info.queue,
-      .DescriptorPool = descriptor_pool.get(),
+      .DescriptorPool = {},
       .RenderPass = {},
       .MinImageCount = 2,
       .ImageCount = static_cast<std::uint32_t>(resource_buffering),
       .MSAASamples = static_cast<VkSampleCountFlagBits>(create_info.samples),
       .PipelineCache = {},
       .Subpass = {},
+      .DescriptorPoolSize = 2,
       .UseDynamicRendering = true,
       .PipelineRenderingCreateInfo = pipline_rendering_info,
       .Allocator = {},

@@ -3,11 +3,13 @@
 #include "window.h"
 #include <vulkan/vulkan_structs.hpp>
 #include <chrono>
+#include <format>
+#include <fstream>
 #include <imgui.h>
 #include <print>
 #include <ranges>
 
-using namespace std::chrono_literals;
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace {
   [[nodiscard]] auto locate_assets_dir() -> fs::path {
@@ -54,9 +56,37 @@ namespace {
 
     return layers;
   }
+
+  [[nodiscard]] auto to_spir_v(fs::path const &path)
+    -> std::vector<std::uint32_t> {
+    // Open the file at the end, to get the total size.
+    auto file = std::ifstream{path, std::ios::binary | std::ios::ate};
+    if (!file.is_open()) {
+      throw std::runtime_error{
+        std::format("Failed to open file: '{}'", path.generic_string())
+      };
+    }
+
+    auto const size = file.tellg();
+    auto const usize = static_cast<std::uint64_t>(size);
+    // file data must be uint32 aligned.
+    if (usize % sizeof(std::uint32_t) != 0) {
+      throw std::runtime_error{std::format("Invalid SPIR-V size: {}", usize)};
+    }
+
+    // Seek to the beginning before reading.
+    file.seekg({}, std::ios::beg);
+    auto ret = std::vector<std::uint32_t>{};
+    ret.resize(usize / sizeof(std::uint32_t));
+    void *data = ret.data();
+    file.read(static_cast<char *>(data), size);
+    return ret;
+  }
 } // namespace
 
 namespace lvk {
+  using namespace std::chrono_literals;
+
   void App::run() {
     assets_dir = locate_assets_dir();
     std::println("[lvk] Using assets directory: {}", assets_dir.string());
@@ -69,6 +99,7 @@ namespace lvk {
     create_swapchain();
     create_render_sync();
     create_imgui();
+    create_shader();
 
     main_loop();
   }
@@ -78,6 +109,9 @@ namespace lvk {
   }
 
   void App::create_instance() {
+    // Initialize the dispatcher without any arguments.
+    VULKAN_HPP_DEFAULT_DISPATCHER.init();
+
     auto app_info = vk::ApplicationInfo()
                       .setPApplicationName("Learn Vulkan")
                       .setApiVersion(vk_version);
@@ -95,6 +129,7 @@ namespace lvk {
                            .setPEnabledExtensionNames(extensions);
 
     instance = vk::createInstanceUnique(instance_info);
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(*instance);
   }
 
   void App::create_surface() {
@@ -111,10 +146,10 @@ namespace lvk {
     // since we use only one queue, it has the entire priority range, ie, 1.0
     static constexpr auto queue_priorities = std::array{1.0f};
 
-    auto queue_ci = vk::DeviceQueueCreateInfo()
-                      .setQueueFamilyIndex(gpu.queue_family)
-                      .setQueueCount(1)
-                      .setQueuePriorities(queue_priorities);
+    auto queue_info = vk::DeviceQueueCreateInfo()
+                        .setQueueFamilyIndex(gpu.queue_family)
+                        .setQueueCount(1)
+                        .setQueuePriorities(queue_priorities);
 
     // nice-to-have optional core features, enable if GPU supports them.
     auto enabled_features =
@@ -146,11 +181,13 @@ namespace lvk {
 
     auto device_info = vk::DeviceCreateInfo()
                          .setPEnabledExtensionNames(extensions)
-                         .setQueueCreateInfos(queue_ci)
+                         .setQueueCreateInfos(queue_info)
                          .setPEnabledFeatures(&enabled_features)
                          .setPNext(&sync_feature);
 
     device = gpu.device.createDeviceUnique(device_info);
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(*device);
+
     waiter = *device;
 
     static constexpr std::uint32_t queue_index{0};
@@ -172,6 +209,21 @@ namespace lvk {
 
     imgui.emplace(imgui_info);
   };
+
+  void App::create_shader() {
+    auto const vertex_spirv = to_spir_v(assets_dir / "vert.spv");
+    auto const fragment_spirv = to_spir_v(assets_dir / "frag.spv");
+
+    auto const shader_info = ShaderProgram::CreateInfo{
+      .device = *device,
+      .vertex_spirv = vertex_spirv,
+      .fragment_spirv = fragment_spirv,
+      .vertex_input = {},
+      .set_layouts = {},
+    };
+
+    shader.emplace(shader_info);
+  }
 
   void App::main_loop() {
     while (glfwWindowShouldClose(window.get()) == GLFW_FALSE) {
@@ -303,7 +355,6 @@ namespace lvk {
         .setImageLayout(vk::ImageLayout::eAttachmentOptimal)
         .setLoadOp(vk::AttachmentLoadOp::eClear)
         .setStoreOp(vk::AttachmentStoreOp::eStore)
-        // temporarily red.
         .setClearValue(vk::ClearColorValue{1.0f, 0.0f, 0.0f, 1.0f});
 
     auto const render_area = vk::Rect2D{vk::Offset2D{}, render_target->extent};
@@ -313,15 +364,9 @@ namespace lvk {
                             .setLayerCount(1);
 
     command_buffer.beginRendering(rendering_info);
-    // ImGui::ShowDemoWindow();
 
-    ImGui::Text(
-      "Application average %.3f ms/frame (%.1f FPS)",
-      1000.0f / ImGui::GetIO().Framerate,
-      ImGui::GetIO().Framerate
-    );
-
-    // TODO(teevik): draw stuff here
+    inspect();
+    draw(command_buffer);
 
     command_buffer.endRendering();
 
@@ -329,9 +374,9 @@ namespace lvk {
 
     // We don't want to clear the image again, instead load it intact after the
     // previous pass.
-    color_attachment.setLoadOp(vk::AttachmentLoadOp::eLoad);
-    rendering_info.setColorAttachments(color_attachment)
-      .setPDepthAttachment(nullptr);
+    color_attachment = color_attachment.setLoadOp(vk::AttachmentLoadOp::eLoad);
+    rendering_info = rendering_info.setColorAttachments(color_attachment)
+                       .setPDepthAttachment(nullptr);
     command_buffer.beginRendering(rendering_info);
     imgui->render(command_buffer);
     command_buffer.endRendering();
@@ -389,5 +434,38 @@ namespace lvk {
     if (fb_size_changed || out_of_date) {
       swapchain->recreate(framebuffer_size);
     }
+  }
+
+  void App::inspect() {
+    // ImGui::Text(
+    //   "Application average %.3f ms/frame (%.1f FPS)",
+    //   1000.0f / ImGui::GetIO().Framerate,
+    //   ImGui::GetIO().Framerate
+    // );
+
+    ImGui::SetNextWindowSize({200.0f, 100.0f}, ImGuiCond_Once);
+    if (ImGui::Begin("Inspect")) {
+      if (ImGui::Checkbox("wireframe", &wireframe)) {
+        shader->polygon_mode =
+          wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
+      }
+      if (wireframe) {
+        auto const &line_width_range = gpu.properties.limits.lineWidthRange;
+        ImGui::SetNextItemWidth(100.0f);
+        ImGui::DragFloat(
+          "line width",
+          &shader->line_width,
+          0.25f,
+          line_width_range[0],
+          line_width_range[1]
+        );
+      }
+    }
+    ImGui::End();
+  }
+
+  void App::draw(vk::CommandBuffer command_buffer) const {
+    shader->bind(command_buffer, framebuffer_size);
+    command_buffer.draw(3, 1, 0, 0);
   }
 } // namespace lvk

@@ -4,6 +4,7 @@
 #include "gpu.h"
 #include "resource_buffering.h"
 #include "scoped_waiter.h"
+#include "shader_program.h"
 #include "swapchain.h"
 #include "window.h"
 #include <vulkan/vulkan_handles.hpp>
@@ -46,7 +47,11 @@ namespace lvk {
     std::optional<RenderTarget> render_target;
     std::optional<DearImGui> imgui;
 
+    std::optional<ShaderProgram> shader;
+
     ScopedWaiter waiter;
+
+    bool wireframe = false;
 
     void create_window();
     void create_instance();
@@ -56,6 +61,7 @@ namespace lvk {
     void create_swapchain();
     void create_render_sync();
     void create_imgui();
+    void create_shader();
 
     void main_loop();
 
@@ -65,6 +71,9 @@ namespace lvk {
     void render(vk::CommandBuffer command_buffer);
     void transition_for_present(vk::CommandBuffer command_buffer) const;
     void submit_and_present();
+
+    void inspect();
+    void draw(vk::CommandBuffer command_buffer) const;
 
   public:
     void run();
