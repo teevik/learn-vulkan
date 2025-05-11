@@ -139,6 +139,7 @@ namespace lvk {
     // Wait for the device to be idle before destroying the current swapchain.
     device.waitIdle();
     swapchain = device.createSwapchainKHRUnique(swapchain_create_info);
+    image_index.reset();
 
     populate_images();
     create_image_views();
@@ -214,12 +215,13 @@ namespace lvk {
 
   auto Swapchain::base_barrier() const -> vk::ImageMemoryBarrier2 {
     // fill up the parts common to all barriers.
-    auto ret = vk::ImageMemoryBarrier2{};
-    ret.setImage(images.at(image_index.value()))
-      .setSubresourceRange(subresource_range)
-      .setSrcQueueFamilyIndex(gpu.queue_family)
-      .setDstQueueFamilyIndex(gpu.queue_family);
-    return ret;
+    auto barrier = vk::ImageMemoryBarrier2()
+                     .setImage(images.at(image_index.value()))
+                     .setSubresourceRange(subresource_range)
+                     .setSrcQueueFamilyIndex(gpu.queue_family)
+                     .setDstQueueFamilyIndex(gpu.queue_family);
+
+    return barrier;
   }
 
   auto Swapchain::present(vk::Queue const queue, vk::Semaphore const to_wait)

@@ -109,6 +109,7 @@ namespace lvk {
     vk::CommandBuffer const command_buffer
   ) const {
     auto const alpha_blend = to_vkbool((flags & AlphaBlend) == AlphaBlend);
+
     command_buffer.setColorBlendEnableEXT(0, alpha_blend);
     command_buffer.setColorBlendEquationEXT(0, color_blend_equation);
   }
@@ -120,10 +121,12 @@ namespace lvk {
       vk::ShaderStageFlagBits::eVertex,
       vk::ShaderStageFlagBits::eFragment,
     };
+
     auto const shaders = std::array{
       *this->shaders[0],
       *this->shaders[1],
     };
+
     command_buffer.bindShadersEXT(stages_v, shaders);
   }
 

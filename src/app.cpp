@@ -160,11 +160,11 @@ namespace lvk {
         .setSampleRateShading(gpu.features.sampleRateShading);
 
     auto shader_object_feature =
-      vk::PhysicalDeviceShaderObjectFeaturesEXT{vk::True};
+      vk::PhysicalDeviceShaderObjectFeaturesEXT(vk::True);
 
     // Extra features that need to be explicitly enabled.
     auto dynamic_rendering_feature =
-      vk::PhysicalDeviceDynamicRenderingFeatures{vk::True}.setPNext(
+      vk::PhysicalDeviceDynamicRenderingFeatures(vk::True).setPNext(
         &shader_object_feature
       );
 
@@ -333,6 +333,7 @@ namespace lvk {
     // Undefined => AttachmentOptimal
     // the barrier must wait for prior color attachment operations to complete,
     // and block subsequent ones.
+
     barrier.setOldLayout(vk::ImageLayout::eUndefined)
       .setNewLayout(vk::ImageLayout::eAttachmentOptimal)
       .setSrcAccessMask(
@@ -355,7 +356,7 @@ namespace lvk {
         .setImageLayout(vk::ImageLayout::eAttachmentOptimal)
         .setLoadOp(vk::AttachmentLoadOp::eClear)
         .setStoreOp(vk::AttachmentStoreOp::eStore)
-        .setClearValue(vk::ClearColorValue{1.0f, 0.0f, 0.0f, 1.0f});
+        .setClearValue(vk::ClearColorValue{0.0f, 0.0f, 0.0f, 1.0f});
 
     auto const render_area = vk::Rect2D{vk::Offset2D{}, render_target->extent};
     auto rendering_info = vk::RenderingInfo()

@@ -35,6 +35,8 @@ namespace lvk {
         vk::True;
     };
 
+    std::optional<Gpu> fallback;
+
     for (auto const &device : instance.enumeratePhysicalDevices()) {
       auto gpu = Gpu{
         .device = device,
@@ -47,8 +49,14 @@ namespace lvk {
       if (!set_queue_family(gpu)) continue;
       if (!can_present(gpu)) continue;
 
-      return gpu;
+      if (gpu.properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) {
+        return gpu;
+      }
+
+      fallback = gpu;
     }
+
+    if (fallback) return fallback.value();
 
     throw std::runtime_error{"No suitable Vulkan Physical Devices"};
   }
