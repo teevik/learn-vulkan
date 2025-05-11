@@ -6,6 +6,7 @@
 #include "scoped_waiter.h"
 #include "shader_program.h"
 #include "swapchain.h"
+#include "vma.h"
 #include "window.h"
 #include <vulkan/vulkan_handles.hpp>
 #include <filesystem>
@@ -34,10 +35,13 @@ namespace lvk {
     Gpu gpu{};
     vk::UniqueDevice device;
     vk::Queue queue;
+    vma::Allocator allocator;
 
     std::optional<Swapchain> swapchain;
     // Command pool for all render Command Buffers
     vk::UniqueCommandPool render_cmd_pool;
+    // Command pool for all Command Blocks.
+    vk::UniqueCommandPool cmd_block_pool;
     // Sync and Command Buffer for virtual frames
     Buffered<RenderSync> render_sync{};
     // Current virtual frame index
@@ -48,6 +52,7 @@ namespace lvk {
     std::optional<DearImGui> imgui;
 
     std::optional<ShaderProgram> shader;
+    vma::Buffer vbo;
 
     ScopedWaiter waiter;
 
@@ -61,7 +66,12 @@ namespace lvk {
     void create_swapchain();
     void create_render_sync();
     void create_imgui();
+    void create_allocator();
     void create_shader();
+    void create_cmd_block_pool();
+    void create_vertex_buffer();
+
+    [[nodiscard]] auto create_command_block() const -> CommandBlock;
 
     void main_loop();
 

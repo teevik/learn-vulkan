@@ -2,6 +2,7 @@
 #include <print>
 
 auto main() -> int {
+  // TODO(teevik) Configurable
   glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
   try {
