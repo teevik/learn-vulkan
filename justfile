@@ -8,5 +8,5 @@ build: shaders
     ninja -C build/
     cp ./build/compile_commands.json .
 
-run: build
-    ./build/Debug/learn-vk
+run TARGET: build
+    ./bin/{{ TARGET }}

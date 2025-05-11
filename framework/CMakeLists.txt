@@ -9,12 +9,12 @@ add_library(learn-vk::framework ALIAS ${PROJECT_NAME})
 
 
 # Setup precompiled header
-target_precompile_headers(${PROJECT_NAME} PRIVATE
+target_precompile_headers(${PROJECT_NAME} PUBLIC
   <glm/glm.hpp>
   <vulkan/vulkan.hpp>
 )
 
 # Add current directory as include directory
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/..)
 
 target_link_libraries(${PROJECT_NAME} learn-vk::ext)

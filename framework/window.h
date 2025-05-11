@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ext/src/glm/glm/fwd.hpp"
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_handles.hpp>
 #include <memory>
