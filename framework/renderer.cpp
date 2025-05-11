@@ -1,42 +1,15 @@
-#include "app.h"
-#include "vertex.h"
-#include "framework/gpu.h"
-#include "framework/vma.h"
+#include "renderer.h"
+#include "gpu.h"
+#include "vma.h"
 #include <vulkan/vulkan_structs.hpp>
 #include <chrono>
 #include <format>
-#include <fstream>
+#include <functional>
 #include <imgui.h>
 #include <print>
 #include <ranges>
 
 namespace {
-  template <typename T> [[nodiscard]] constexpr auto to_byte_array(T const &t) {
-    return std::bit_cast<std::array<std::byte, sizeof(T)>>(t);
-  }
-
-  [[nodiscard]] auto locate_assets_dir() -> fs::path {
-    // Look for '<path>/assets/', starting from the working
-    // directory and walking up the parent directory tree.
-    static constexpr std::string_view dir_name{"assets"};
-
-    for (auto path = fs::current_path();
-         !path.empty() && path.has_parent_path();
-         path = path.parent_path()) {
-
-      // Exit early if path is "/"
-      if (path == fs::path("/")) break;
-
-      auto assets_dir = path / dir_name;
-
-      if (fs::is_directory(assets_dir)) return assets_dir;
-    }
-
-    std::println("[lvk] Warning: could not locate '{}' directory", dir_name);
-
-    return fs::current_path();
-  }
-
   [[nodiscard]] auto get_valid_layers(std::span<char const *const> desired)
     -> std::vector<char const *> {
     auto layers = std::vector<char const *>{};
@@ -59,41 +32,12 @@ namespace {
 
     return layers;
   }
-
-  [[nodiscard]] auto to_spir_v(fs::path const &path)
-    -> std::vector<std::uint32_t> {
-    // Open the file at the end, to get the total size.
-    auto file = std::ifstream{path, std::ios::binary | std::ios::ate};
-    if (!file.is_open()) {
-      throw std::runtime_error{
-        std::format("Failed to open file: '{}'", path.generic_string())
-      };
-    }
-
-    auto const size = file.tellg();
-    auto const usize = static_cast<std::uint64_t>(size);
-    // file data must be uint32 aligned.
-    if (usize % sizeof(std::uint32_t) != 0) {
-      throw std::runtime_error{std::format("Invalid SPIR-V size: {}", usize)};
-    }
-
-    // Seek to the beginning before reading.
-    file.seekg({}, std::ios::beg);
-    auto ret = std::vector<std::uint32_t>{};
-    ret.resize(usize / sizeof(std::uint32_t));
-    void *data = ret.data();
-    file.read(static_cast<char *>(data), size);
-    return ret;
-  }
 } // namespace
 
 namespace lvk {
   using namespace std::chrono_literals;
 
-  void App::run() {
-    assets_dir = locate_assets_dir();
-    std::println("[lvk] Using assets directory: {}", assets_dir.string());
-
+  Renderer::Renderer() {
     create_window();
     create_instance();
     create_surface();
@@ -103,18 +47,14 @@ namespace lvk {
     create_swapchain();
     create_render_sync();
     create_imgui();
-    create_shader();
     create_cmd_block_pool();
-    create_vertex_buffer();
-
-    main_loop();
   }
 
-  void App::create_window() {
+  void Renderer::create_window() {
     window = glfw::create_window({1280, 720}, "Learn Vulkan");
   }
 
-  void App::create_instance() {
+  void Renderer::create_instance() {
     // Initialize the dispatcher without any arguments.
     VULKAN_HPP_DEFAULT_DISPATCHER.init();
 
@@ -138,17 +78,17 @@ namespace lvk {
     VULKAN_HPP_DEFAULT_DISPATCHER.init(*instance);
   }
 
-  void App::create_surface() {
+  void Renderer::create_surface() {
     surface = glfw::create_surface(window.get(), instance.get());
   }
 
-  void App::select_gpu() {
+  void Renderer::select_gpu() {
     gpu = get_suitable_gpu(*instance, *surface);
 
     std::println("Using GPU: {}", std::string_view{gpu.properties.deviceName});
   }
 
-  void App::create_device() {
+  void Renderer::create_device() {
     // since we use only one queue, it has the entire priority range, ie, 1.0
     static constexpr auto queue_priorities = std::array{1.0f};
 
@@ -200,7 +140,7 @@ namespace lvk {
     queue = device->getQueue(gpu.queue_family, queue_index);
   }
 
-  void App::create_imgui() {
+  void Renderer::create_imgui() {
     auto const imgui_info = DearImGui::CreateInfo{
       .window = window.get(),
       .api_version = vk_version,
@@ -216,31 +156,11 @@ namespace lvk {
     imgui.emplace(imgui_info);
   };
 
-  void App::create_allocator() {
+  void Renderer::create_allocator() {
     allocator = vma::create_allocator(*instance, gpu.device, *device);
   }
 
-  void App::create_shader() {
-    auto const vertex_spirv = to_spir_v(assets_dir / "vert.spv");
-    auto const fragment_spirv = to_spir_v(assets_dir / "frag.spv");
-
-    static constexpr auto vertex_input = ShaderVertexInput{
-      .attributes = vertex_attributes,
-      .bindings = vertex_bindings,
-    };
-
-    auto const shader_info = ShaderProgram::CreateInfo{
-      .device = *device,
-      .vertex_spirv = vertex_spirv,
-      .fragment_spirv = fragment_spirv,
-      .vertex_input = vertex_input,
-      .set_layouts = {},
-    };
-
-    shader.emplace(shader_info);
-  }
-
-  void App::create_cmd_block_pool() {
+  void Renderer::create_cmd_block_pool() {
     auto command_pool_info =
       vk::CommandPoolCreateInfo()
         .setQueueFamilyIndex(gpu.queue_family)
@@ -251,64 +171,7 @@ namespace lvk {
     cmd_block_pool = device->createCommandPoolUnique(command_pool_info);
   }
 
-  void App::create_vertex_buffer() {
-    // Vertices moved from the shader.
-    static constexpr auto vertices = std::array{
-      // Vertex{.position = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}},
-      // Vertex{.position = {0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}},
-      // Vertex{.position = {0.0f, 0.5f}, .color = {0.0f, 0.0f, 1.0f}},
-      Vertex{.position = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}},
-      Vertex{.position = {0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}},
-      Vertex{.position = {0.5f, 0.5f}, .color = {0.0f, 0.0f, 1.0f}},
-      Vertex{.position = {-0.5f, 0.5f}, .color = {1.0f, 1.0f, 0.0f}},
-    };
-
-    static constexpr auto indices = std::array{
-      0u,
-      1u,
-      2u,
-      2u,
-      3u,
-      0u,
-    };
-
-    static constexpr auto vertices_bytes = to_byte_array(vertices);
-    static constexpr auto indices_bytes = to_byte_array(indices);
-
-    static constexpr auto total_bytes =
-      std::array<std::span<std::byte const>, 2>{
-        vertices_bytes,
-        indices_bytes,
-      };
-
-    auto const buffer_info = vma::BufferCreateInfo{
-      .allocator = allocator.get(),
-      .usage = vk::BufferUsageFlagBits::eVertexBuffer |
-        vk::BufferUsageFlagBits::eIndexBuffer,
-      .queue_family = gpu.queue_family,
-    };
-
-    // vbo = vma::create_device_buffer(
-    //   allocator.get(),
-    //   vk::BufferUsageFlagBits::eVertexBuffer |
-    //     vk::BufferUsageFlagBits::eIndexBuffer,
-    //   create_command_block(),
-    //   total_bytes
-    // );
-
-    vbo = vma::create_device_buffer(
-      buffer_info, create_command_block(), total_bytes
-    );
-
-    // // Host buffers have a memory-mapped pointer available to memcpy data to.
-    // std::memcpy(vbo.get().mapped, vertices.data(), sizeof(vertices));
-  }
-
-  auto App::create_command_block() const -> CommandBlock {
-    return CommandBlock{*device, queue, *cmd_block_pool};
-  }
-
-  void App::main_loop() {
+  void Renderer::run(const std::function<void(vk::CommandBuffer const)> &draw) {
     while (glfwWindowShouldClose(window.get()) == GLFW_FALSE) {
       glfwPollEvents();
 
@@ -316,13 +179,13 @@ namespace lvk {
 
       auto const command_buffer = begin_frame();
       transition_for_render(command_buffer);
-      render(command_buffer);
+      render(command_buffer, draw);
       transition_for_present(command_buffer);
       submit_and_present();
     }
   }
 
-  auto App::acquire_render_target() -> bool {
+  auto Renderer::acquire_render_target() -> bool {
     framebuffer_size = glfw::framebuffer_size(window.get());
 
     // Skip loop if minimized
@@ -356,13 +219,13 @@ namespace lvk {
     return true;
   }
 
-  void App::create_swapchain() {
+  void Renderer::create_swapchain() {
     auto const size = glfw::framebuffer_size(window.get());
 
     swapchain.emplace(*device, gpu, *surface, size);
   }
 
-  void App::create_render_sync() {
+  void Renderer::create_render_sync() {
     auto command_pool_info =
       vk::CommandPoolCreateInfo()
         // Enables resetting command buffer
@@ -398,7 +261,7 @@ namespace lvk {
     }
   }
 
-  auto App::begin_frame() -> vk::CommandBuffer {
+  auto Renderer::begin_frame() -> vk::CommandBuffer {
     auto const &current_render_sync = render_sync.at(frame_index);
 
     auto command_buffer_bi = vk::CommandBufferBeginInfo{};
@@ -408,7 +271,7 @@ namespace lvk {
     return current_render_sync.command_buffer;
   }
 
-  void App::transition_for_render(
+  void Renderer::transition_for_render(
     vk::CommandBuffer const command_buffer
   ) const {
     auto barrier = swapchain->base_barrier();
@@ -432,7 +295,10 @@ namespace lvk {
     command_buffer.pipelineBarrier2(dependency_info);
   }
 
-  void App::render(vk::CommandBuffer const command_buffer) {
+  void Renderer::render(
+    vk::CommandBuffer const command_buffer,
+    const std::function<void(vk::CommandBuffer const)> &draw
+  ) {
     auto color_attachment =
       vk::RenderingAttachmentInfo()
         .setImageView(render_target->image_view)
@@ -449,7 +315,6 @@ namespace lvk {
 
     command_buffer.beginRendering(rendering_info);
 
-    inspect();
     draw(command_buffer);
 
     command_buffer.endRendering();
@@ -466,7 +331,7 @@ namespace lvk {
     command_buffer.endRendering();
   }
 
-  void App::transition_for_present(
+  void Renderer::transition_for_present(
     vk::CommandBuffer const command_buffer
   ) const {
     auto barrier = swapchain->base_barrier();
@@ -488,7 +353,7 @@ namespace lvk {
     command_buffer.pipelineBarrier2(dependency_info);
   }
 
-  void App::submit_and_present() {
+  void Renderer::submit_and_present() {
     auto const &current_render_sync = render_sync.at(frame_index);
     current_render_sync.command_buffer.end();
 
@@ -518,49 +383,5 @@ namespace lvk {
     if (fb_size_changed || out_of_date) {
       swapchain->recreate(framebuffer_size);
     }
-  }
-
-  void App::inspect() {
-    // ImGui::Text(
-    //   "Application average %.3f ms/frame (%.1f FPS)",
-    //   1000.0f / ImGui::GetIO().Framerate,
-    //   ImGui::GetIO().Framerate
-    // );
-
-    ImGui::SetNextWindowSize({200.0f, 100.0f}, ImGuiCond_Once);
-    if (ImGui::Begin("Inspect")) {
-      if (ImGui::Checkbox("wireframe", &wireframe)) {
-        shader->polygon_mode =
-          wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
-      }
-
-      if (wireframe) {
-        auto const &line_width_range = gpu.properties.limits.lineWidthRange;
-        ImGui::SetNextItemWidth(100.0f);
-        ImGui::DragFloat(
-          "line width",
-          &shader->line_width,
-          0.25f,
-          line_width_range[0],
-          line_width_range[1]
-        );
-      }
-    }
-    ImGui::End();
-  }
-
-  void App::draw(vk::CommandBuffer command_buffer) const {
-    shader->bind(command_buffer, framebuffer_size);
-
-    // Single VBO at binding 0 at no offset
-    command_buffer.bindVertexBuffers(0, vbo.get().buffer, vk::DeviceSize{});
-
-    // u32 indices after offset of 4 vertices
-    command_buffer.bindIndexBuffer(
-      vbo.get().buffer, 4 * sizeof(Vertex), vk::IndexType::eUint32
-    );
-
-    // command_buffer.draw(3, 1, 0, 0);
-    command_buffer.drawIndexed(6, 1, 0, 0, 0);
   }
 } // namespace lvk

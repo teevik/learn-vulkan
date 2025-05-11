@@ -4,18 +4,15 @@
 #include "framework/gpu.h"
 #include "framework/resource_buffering.h"
 #include "framework/scoped_waiter.h"
-#include "framework/shader_program.h"
 #include "framework/swapchain.h"
 #include "framework/vma.h"
 #include "framework/window.h"
 #include <vulkan/vulkan_handles.hpp>
-#include <filesystem>
-
-namespace fs = std::filesystem;
+#include <functional>
 
 namespace lvk {
-  class App {
-  private:
+  class Renderer {
+  public:
     struct RenderSync {
       /// Signalled when Swapchain image has been acquired
       vk::UniqueSemaphore draw;
@@ -26,8 +23,6 @@ namespace lvk {
       /// Used to record rendering commands
       vk::CommandBuffer command_buffer;
     };
-
-    fs::path assets_dir;
 
     glfw::Window window;
     vk::UniqueInstance instance;
@@ -51,9 +46,6 @@ namespace lvk {
     std::optional<RenderTarget> render_target;
     std::optional<DearImGui> imgui;
 
-    std::optional<ShaderProgram> shader;
-    vma::Buffer vbo;
-
     ScopedWaiter waiter;
 
     bool wireframe = false;
@@ -67,25 +59,22 @@ namespace lvk {
     void create_render_sync();
     void create_imgui();
     void create_allocator();
-    void create_shader();
     void create_cmd_block_pool();
-    void create_vertex_buffer();
-
-    [[nodiscard]] auto create_command_block() const -> CommandBlock;
-
-    void main_loop();
 
     auto acquire_render_target() -> bool;
     auto begin_frame() -> vk::CommandBuffer;
     void transition_for_render(vk::CommandBuffer command_buffer) const;
-    void render(vk::CommandBuffer command_buffer);
+    void render(
+      vk::CommandBuffer command_buffer,
+      const std::function<void(vk::CommandBuffer const)> &draw
+    );
     void transition_for_present(vk::CommandBuffer command_buffer) const;
     void submit_and_present();
 
     void inspect();
     void draw(vk::CommandBuffer command_buffer) const;
 
-  public:
-    void run();
+    explicit Renderer();
+    void run(const std::function<void(vk::CommandBuffer const)> &draw);
   };
 } // namespace lvk
