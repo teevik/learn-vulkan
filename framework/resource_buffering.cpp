@@ -3,9 +3,9 @@ module;
 #include <array>
 #include <cstddef>
 
-export module framework_module:resource_buffering;
+export module framework:resource_buffering;
 
-namespace framework_module {
+namespace framework {
   /// Number of virtual frames
   inline constexpr std::size_t resource_buffering{2};
 

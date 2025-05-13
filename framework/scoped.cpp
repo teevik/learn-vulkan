@@ -3,9 +3,9 @@ module;
 #include <concepts>
 #include <utility>
 
-export module framework_module:scoped;
+export module framework:scoped;
 
-namespace framework_module {
+namespace framework {
   export template <typename Type>
   concept Scopeable =
     std::equality_comparable<Type> && std::is_default_constructible_v<Type>;
@@ -46,4 +46,4 @@ namespace framework_module {
   private:
     Type m_t{};
   };
-} // namespace framework_module
+} // namespace framework

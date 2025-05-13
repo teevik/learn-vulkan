@@ -13,7 +13,7 @@ module;
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
-export module framework_module:renderer;
+export module framework:renderer;
 import :dear_imgui;
 import :gpu;
 import :resource_buffering;
@@ -49,7 +49,7 @@ namespace {
   }
 } // namespace
 
-namespace framework_module {
+namespace framework {
   export class Renderer {
   public:
     struct RenderSync {

@@ -5,11 +5,11 @@ module;
 #include <print>
 #include <vector>
 
-export module framework_module:assets;
+export module framework:assets;
 
 namespace fs = std::filesystem;
 
-namespace framework_module {
+namespace framework {
   /// Look for `<path>/assets/`, starting from the working
   /// directory and walking up the parent directory tree
   export [[nodiscard]] auto locate_assets_dir() -> fs::path {
@@ -60,4 +60,4 @@ namespace framework_module {
     file.read(static_cast<char *>(data), size);
     return ret;
   }
-} // namespace framework_module
+} // namespace framework

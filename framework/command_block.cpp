@@ -4,11 +4,11 @@ module;
 #include <chrono>
 #include <print>
 
-export module framework_module:command_block;
+export module framework:command_block;
 
 using namespace std::chrono_literals;
 
-namespace framework_module {
+namespace framework {
   export class CommandBlock {
   public:
     explicit CommandBlock(
@@ -70,4 +70,4 @@ namespace framework_module {
     vk::Queue queue;
     vk::UniqueCommandBuffer command_buffer;
   };
-} // namespace framework_module
+} // namespace framework

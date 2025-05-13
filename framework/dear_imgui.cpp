@@ -8,11 +8,11 @@ module;
 #include <vulkan/vulkan.hpp>
 #include <imgui.h>
 
-export module framework_module:dear_imgui;
+export module framework:dear_imgui;
 import :scoped;
 import :resource_buffering;
 
-namespace framework_module {
+namespace framework {
   struct DearImGuiCreateInfo {
     GLFWwindow *window{};
     std::uint32_t api_version{};
@@ -134,4 +134,4 @@ namespace framework_module {
 
     Scoped<vk::Device, Deleter> device;
   };
-} // namespace framework_module
+} // namespace framework

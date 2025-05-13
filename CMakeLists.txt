@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${PROJECT_SOURCE_DIR}/bin>)
 
 add_subdirectory(ext)
-add_subdirectory(framework_module)
+add_subdirectory(framework)
 
 add_subdirectory(examples/triangle)
 add_subdirectory(examples/quad)

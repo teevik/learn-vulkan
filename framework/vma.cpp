@@ -6,11 +6,11 @@ module;
 #include <print>
 #include <vk_mem_alloc.h>
 
-export module framework_module:vma;
+export module framework:vma;
 import :scoped;
 import :command_block;
 
-namespace framework_module::vma {
+namespace framework::vma {
   export struct Deleter {
     void operator()(VmaAllocator allocator) const noexcept {
       vmaDestroyAllocator(allocator);
@@ -191,4 +191,4 @@ namespace framework_module::vma {
 
     return device_buffer;
   }
-} // namespace framework_module::vma
+} // namespace framework::vma

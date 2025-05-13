@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <print>
 
-import framework_module;
+import framework;
 
 namespace fs = std::filesystem;
 
@@ -40,19 +40,19 @@ namespace {
   }
 
   auto create_shader(
-    framework_module::Renderer &app,
+    framework::Renderer &app,
     const fs::path &vertex_path,
     const fs::path &fragment_path
-  ) -> framework_module::ShaderProgram {
-    auto const vertex_spirv = framework_module::read_spir_v(vertex_path);
-    auto const fragment_spirv = framework_module::read_spir_v(fragment_path);
+  ) -> framework::ShaderProgram {
+    auto const vertex_spirv = framework::read_spir_v(vertex_path);
+    auto const fragment_spirv = framework::read_spir_v(fragment_path);
 
-    static constexpr auto vertex_input = framework_module::ShaderVertexInput{
+    static constexpr auto vertex_input = framework::ShaderVertexInput{
       .attributes = vertex_attributes,
       .bindings = vertex_bindings,
     };
 
-    auto const shader_info = framework_module::ShaderProgram::CreateInfo{
+    auto const shader_info = framework::ShaderProgram::CreateInfo{
       .device = *app.device,
       .vertex_spirv = vertex_spirv,
       .fragment_spirv = fragment_spirv,
@@ -60,11 +60,11 @@ namespace {
       .set_layouts = {},
     };
 
-    return framework_module::ShaderProgram(shader_info);
+    return framework::ShaderProgram(shader_info);
   }
 
-  auto create_vertex_buffer(framework_module::Renderer &app)
-    -> framework_module::vma::Buffer {
+  auto create_vertex_buffer(framework::Renderer &app)
+    -> framework::vma::Buffer {
     static constexpr auto vertices = std::array{
       // Vertex{.position = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}},
       // Vertex{.position = {0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}},
@@ -93,18 +93,17 @@ namespace {
         indices_bytes,
       };
 
-    auto const buffer_info = framework_module::vma::BufferCreateInfo{
+    auto const buffer_info = framework::vma::BufferCreateInfo{
       .allocator = app.allocator.get(),
       .usage = vk::BufferUsageFlagBits::eVertexBuffer |
         vk::BufferUsageFlagBits::eIndexBuffer,
       .queue_family = app.gpu.queue_family,
     };
 
-    auto command_block = framework_module::CommandBlock{
-      *app.device, app.queue, *app.cmd_block_pool
-    };
+    auto command_block =
+      framework::CommandBlock{*app.device, app.queue, *app.cmd_block_pool};
 
-    return framework_module::vma::create_device_buffer(
+    return framework::vma::create_device_buffer(
       buffer_info, std::move(command_block), total_bytes
     );
   }
@@ -114,10 +113,10 @@ auto main() -> int {
   // TODO(teevik) Configurable
   glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
-  auto assets_dir = framework_module::locate_assets_dir();
+  auto assets_dir = framework::locate_assets_dir();
   std::println("Using assets directory: {}", assets_dir.string());
 
-  auto app = framework_module::Renderer();
+  auto app = framework::Renderer();
   auto shader =
     create_shader(app, assets_dir / "vert.spv", assets_dir / "frag.spv");
   auto vertex_buffer = create_vertex_buffer(app);

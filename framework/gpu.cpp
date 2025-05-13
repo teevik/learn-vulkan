@@ -4,9 +4,9 @@ module;
 #include <algorithm>
 #include <ranges>
 
-export module framework_module:gpu;
+export module framework:gpu;
 
-namespace framework_module {
+namespace framework {
   export constexpr auto vk_version = VK_MAKE_VERSION(1, 3, 0);
 
   export struct Gpu {
@@ -74,4 +74,4 @@ namespace framework_module {
 
     throw std::runtime_error{"No suitable Vulkan Physical Devices"};
   }
-} // namespace framework_module
+} // namespace framework

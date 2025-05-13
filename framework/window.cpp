@@ -6,9 +6,9 @@ module;
 #include <memory>
 #include <print>
 
-export module framework_module:window;
+export module framework:window;
 
-namespace framework_module::glfw {
+namespace framework::glfw {
   export struct Deleter {
     void operator()(GLFWwindow *window) const noexcept {
       glfwDestroyWindow(window);
@@ -70,4 +70,4 @@ namespace framework_module::glfw {
 
     return size;
   }
-} // namespace framework_module::glfw
+} // namespace framework::glfw

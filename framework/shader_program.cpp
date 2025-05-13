@@ -4,7 +4,7 @@ module;
 #include <vulkan/vulkan.hpp>
 #include <span>
 
-export module framework_module:shader_program;
+export module framework:shader_program;
 import :scoped_waiter;
 
 namespace {
@@ -13,7 +13,7 @@ namespace {
   }
 } // namespace
 
-namespace framework_module {
+namespace framework {
   export struct ShaderVertexInput {
     std::span<vk::VertexInputAttributeDescription2EXT const> attributes;
     std::span<vk::VertexInputBindingDescription2EXT const> bindings;
@@ -175,4 +175,4 @@ namespace framework_module {
       command_buffer.bindShadersEXT(stages_v, shaders);
     }
   };
-} // namespace framework_module
+} // namespace framework

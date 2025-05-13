@@ -1,4 +1,4 @@
-export module framework_module;
+export module framework;
 
 export import :assets;
 export import :command_block;

@@ -4,7 +4,7 @@ module;
 #include <vulkan/vulkan.hpp>
 #include <print>
 
-export module framework_module:swapchain;
+export module framework:swapchain;
 import :gpu;
 
 namespace {
@@ -95,7 +95,7 @@ namespace {
   }
 } // namespace
 
-namespace framework_module {
+namespace framework {
   struct RenderTarget {
     vk::Image image;
     vk::ImageView image_view;
@@ -268,4 +268,4 @@ namespace framework_module {
     std::vector<vk::UniqueImageView> image_views;
     std::optional<std::size_t> image_index;
   };
-} // namespace framework_module
+} // namespace framework
