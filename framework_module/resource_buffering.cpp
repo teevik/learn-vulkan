@@ -1,4 +1,11 @@
-namespace lvk {
+module;
+
+#include <array>
+#include <cstddef>
+
+export module framework_module:resource_buffering;
+
+namespace framework_module {
   /// Number of virtual frames
   inline constexpr std::size_t resource_buffering{2};
 

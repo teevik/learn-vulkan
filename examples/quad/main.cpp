@@ -1,9 +1,13 @@
 #include "imgui.h"
-#include "framework/assets.h"
-#include "framework/command_block.h"
-#include "framework/renderer.h"
-#include "framework/shader_program.h"
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <vulkan/vulkan.hpp>
+#include <filesystem>
 #include <print>
+
+import framework_module;
+
+namespace fs = std::filesystem;
 
 namespace {
   struct Vertex {
@@ -36,19 +40,19 @@ namespace {
   }
 
   auto create_shader(
-    lvk::Renderer &app,
+    framework_module::Renderer &app,
     const fs::path &vertex_path,
     const fs::path &fragment_path
-  ) -> lvk::ShaderProgram {
-    auto const vertex_spirv = lvk::read_spir_v(vertex_path);
-    auto const fragment_spirv = lvk::read_spir_v(fragment_path);
+  ) -> framework_module::ShaderProgram {
+    auto const vertex_spirv = framework_module::read_spir_v(vertex_path);
+    auto const fragment_spirv = framework_module::read_spir_v(fragment_path);
 
-    static constexpr auto vertex_input = lvk::ShaderVertexInput{
+    static constexpr auto vertex_input = framework_module::ShaderVertexInput{
       .attributes = vertex_attributes,
       .bindings = vertex_bindings,
     };
 
-    auto const shader_info = lvk::ShaderProgram::CreateInfo{
+    auto const shader_info = framework_module::ShaderProgram::CreateInfo{
       .device = *app.device,
       .vertex_spirv = vertex_spirv,
       .fragment_spirv = fragment_spirv,
@@ -56,10 +60,11 @@ namespace {
       .set_layouts = {},
     };
 
-    return lvk::ShaderProgram(shader_info);
+    return framework_module::ShaderProgram(shader_info);
   }
 
-  auto create_vertex_buffer(lvk::Renderer &app) -> lvk::vma::Buffer {
+  auto create_vertex_buffer(framework_module::Renderer &app)
+    -> framework_module::vma::Buffer {
     static constexpr auto vertices = std::array{
       // Vertex{.position = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}},
       // Vertex{.position = {0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}},
@@ -88,17 +93,18 @@ namespace {
         indices_bytes,
       };
 
-    auto const buffer_info = lvk::vma::BufferCreateInfo{
+    auto const buffer_info = framework_module::vma::BufferCreateInfo{
       .allocator = app.allocator.get(),
       .usage = vk::BufferUsageFlagBits::eVertexBuffer |
         vk::BufferUsageFlagBits::eIndexBuffer,
       .queue_family = app.gpu.queue_family,
     };
 
-    auto command_block =
-      lvk::CommandBlock{*app.device, app.queue, *app.cmd_block_pool};
+    auto command_block = framework_module::CommandBlock{
+      *app.device, app.queue, *app.cmd_block_pool
+    };
 
-    return lvk::vma::create_device_buffer(
+    return framework_module::vma::create_device_buffer(
       buffer_info, std::move(command_block), total_bytes
     );
   }
@@ -108,10 +114,10 @@ auto main() -> int {
   // TODO(teevik) Configurable
   glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
-  auto assets_dir = lvk::locate_assets_dir();
+  auto assets_dir = framework_module::locate_assets_dir();
   std::println("Using assets directory: {}", assets_dir.string());
 
-  auto app = lvk::Renderer();
+  auto app = framework_module::Renderer();
   auto shader =
     create_shader(app, assets_dir / "vert.spv", assets_dir / "frag.spv");
   auto vertex_buffer = create_vertex_buffer(app);

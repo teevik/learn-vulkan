@@ -1,13 +1,25 @@
-#include "vma.h"
+module;
+
+#include <vulkan/vulkan.hpp>
+#include <cstring>
 #include <numeric>
 #include <print>
+#include <vk_mem_alloc.h>
 
-namespace lvk::vma {
-  void Deleter::operator()(VmaAllocator allocator) const noexcept {
-    vmaDestroyAllocator(allocator);
-  }
+export module framework_module:vma;
+import :scoped;
+import :command_block;
 
-  auto create_allocator(
+namespace framework_module::vma {
+  export struct Deleter {
+    void operator()(VmaAllocator allocator) const noexcept {
+      vmaDestroyAllocator(allocator);
+    }
+  };
+
+  export using Allocator = Scoped<VmaAllocator, Deleter>;
+
+  export [[nodiscard]] auto create_allocator(
     vk::Instance const instance,
     vk::PhysicalDevice const physical_device,
     vk::Device const device
@@ -32,13 +44,39 @@ namespace lvk::vma {
     throw std::runtime_error{"Failed to create Vulkan Memory Allocator"};
   }
 
-  void BufferDeleter::operator()(RawBuffer const &raw_buffer) const noexcept {
-    vmaDestroyBuffer(
-      raw_buffer.allocator, raw_buffer.buffer, raw_buffer.allocation
-    );
-  }
+  export struct RawBuffer {
+    [[nodiscard]] auto mapped_span() const -> std::span<std::byte> {
+      return std::span{static_cast<std::byte *>(mapped), size};
+    }
 
-  auto create_buffer(
+    auto operator==(RawBuffer const &rhs) const -> bool = default;
+
+    VmaAllocator allocator{};
+    VmaAllocation allocation{};
+    vk::Buffer buffer;
+    vk::DeviceSize size{};
+    void *mapped{};
+  };
+
+  export struct BufferDeleter {
+    void operator()(RawBuffer const &raw_buffer) const noexcept {
+      vmaDestroyBuffer(
+        raw_buffer.allocator, raw_buffer.buffer, raw_buffer.allocation
+      );
+    }
+  };
+
+  export using Buffer = Scoped<RawBuffer, BufferDeleter>;
+
+  export struct BufferCreateInfo {
+    VmaAllocator allocator;
+    vk::BufferUsageFlags usage;
+    std::uint32_t queue_family;
+  };
+
+  export enum class BufferMemoryType : std::int8_t { Host, Device };
+
+  export [[nodiscard]] auto create_buffer(
     BufferCreateInfo const &create_info,
     BufferMemoryType const memory_type,
     vk::DeviceSize const size
@@ -96,7 +134,11 @@ namespace lvk::vma {
     };
   }
 
-  auto create_device_buffer(
+  // disparate byte spans.
+  using ByteSpans = std::span<std::span<std::byte const> const>;
+
+  // returns a Device Buffer with each byte span sequentially written.
+  export [[nodiscard]] auto create_device_buffer(
     BufferCreateInfo const &create_info,
     CommandBlock command_block,
     ByteSpans const &byte_spans
@@ -149,4 +191,4 @@ namespace lvk::vma {
 
     return device_buffer;
   }
-} // namespace lvk::vma
+} // namespace framework_module::vma

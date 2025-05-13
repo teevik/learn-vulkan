@@ -98,6 +98,6 @@ target_compile_definitions(${PROJECT_NAME} INTERFACE
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-  # link to dynamic loader
-  target_link_libraries(${PROJECT_NAME} INTERFACE dl)
+    # link to dynamic loader
+    target_link_libraries(${PROJECT_NAME} INTERFACE dl)
 endif()

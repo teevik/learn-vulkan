@@ -1,13 +1,16 @@
-#pragma once
+module;
+
 #include <concepts>
 #include <utility>
 
-namespace lvk {
-  template <typename Type>
+export module framework_module:scoped;
+
+namespace framework_module {
+  export template <typename Type>
   concept Scopeable =
     std::equality_comparable<Type> && std::is_default_constructible_v<Type>;
 
-  template <Scopeable Type, typename Deleter> class Scoped {
+  export template <Scopeable Type, typename Deleter> class Scoped {
   public:
     Scoped(Scoped const &) = delete;
     auto operator=(Scoped const &) = delete;
@@ -43,4 +46,4 @@ namespace lvk {
   private:
     Type m_t{};
   };
-} // namespace lvk
+} // namespace framework_module

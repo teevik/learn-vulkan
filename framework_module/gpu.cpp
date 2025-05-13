@@ -1,9 +1,23 @@
-#include "gpu.h"
+module;
+
+#include <vulkan/vulkan.hpp>
+#include <algorithm>
 #include <ranges>
 
-namespace lvk {
-  auto get_suitable_gpu(
-    vk::Instance const instance, vk::SurfaceKHR const surface
+export module framework_module:gpu;
+
+namespace framework_module {
+  export constexpr auto vk_version = VK_MAKE_VERSION(1, 3, 0);
+
+  export struct Gpu {
+    vk::PhysicalDevice device;
+    vk::PhysicalDeviceProperties properties;
+    vk::PhysicalDeviceFeatures features;
+    uint32_t queue_family{};
+  };
+
+  export [[nodiscard]] auto get_suitable_gpu(
+    vk::Instance instance, vk::SurfaceKHR surface
   ) -> Gpu {
     auto const supports_swapchain = [](Gpu const &gpu) {
       static constexpr std::string_view name_v =
@@ -60,4 +74,4 @@ namespace lvk {
 
     throw std::runtime_error{"No suitable Vulkan Physical Devices"};
   }
-} // namespace lvk
+} // namespace framework_module

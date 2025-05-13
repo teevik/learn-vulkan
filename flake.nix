@@ -25,9 +25,8 @@
               pkg-config
               cmake
               ninja
-              gnumake
-              gcc
-              llvmPackages_20.clang-tools
+              clang-tools
+              ccache
 
               vulkan-utility-libraries
               vulkan-validation-layers

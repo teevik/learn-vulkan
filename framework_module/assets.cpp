@@ -1,9 +1,18 @@
-#include "assets.h"
+module;
+
+#include <filesystem>
 #include <fstream>
 #include <print>
+#include <vector>
 
-namespace lvk {
-  auto locate_assets_dir() -> fs::path {
+export module framework_module:assets;
+
+namespace fs = std::filesystem;
+
+namespace framework_module {
+  /// Look for `<path>/assets/`, starting from the working
+  /// directory and walking up the parent directory tree
+  export [[nodiscard]] auto locate_assets_dir() -> fs::path {
     static constexpr std::string_view dir_name{"assets"};
 
     for (auto path = fs::current_path();
@@ -18,12 +27,16 @@ namespace lvk {
       if (fs::is_directory(assets_dir)) return assets_dir;
     }
 
-    std::println("[lvk] Warning: could not locate '{}' directory", dir_name);
+    std::println(
+      "[framework] Warning: could not locate '{}' directory", dir_name
+    );
 
     return fs::current_path();
   }
 
-  auto read_spir_v(fs::path const &path) -> std::vector<std::uint32_t> {
+  /// Read a SPIR-V file from disk
+  export [[nodiscard]] auto read_spir_v(fs::path const &path)
+    -> std::vector<std::uint32_t> {
     // Open the file at the end, to get the total size.
     auto file = std::ifstream{path, std::ios::binary | std::ios::ate};
     if (!file.is_open()) {
@@ -47,4 +60,4 @@ namespace lvk {
     file.read(static_cast<char *>(data), size);
     return ret;
   }
-} // namespace lvk
+} // namespace framework_module

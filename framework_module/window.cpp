@@ -1,15 +1,26 @@
-#include "window.h"
+module;
+
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <vulkan/vulkan.hpp>
+#include <memory>
 #include <print>
 
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+export module framework_module:window;
 
-namespace lvk::glfw {
-  void Deleter::operator()(GLFWwindow *window) const noexcept {
-    glfwDestroyWindow(window);
-    glfwTerminate();
-  }
+namespace framework_module::glfw {
+  export struct Deleter {
+    void operator()(GLFWwindow *window) const noexcept {
+      glfwDestroyWindow(window);
+      glfwTerminate();
+    }
+  };
 
-  auto create_window(glm::ivec2 const size, char const *title) -> Window {
+  export using Window = std::unique_ptr<GLFWwindow, Deleter>;
+
+  /// Returns a valid Window if successful, else throws.
+  export [[nodiscard]] auto create_window(glm::ivec2 size, char const *title)
+    -> Window {
     static auto const on_error = [](int const code, char const *description) {
       std::println(stderr, "[GLFW] Error {}: {}", code, description);
     };
@@ -32,14 +43,16 @@ namespace lvk::glfw {
     return window;
   }
 
-  auto instance_extensions() -> std::span<char const *const> {
+  export [[nodiscard]] auto instance_extensions()
+    -> std::span<char const *const> {
     auto count = std::uint32_t{};
     auto const *extensions = glfwGetRequiredInstanceExtensions(&count);
     return {extensions, static_cast<std::size_t>(count)};
   }
 
-  auto create_surface(GLFWwindow *window, vk::Instance const instance)
-    -> vk::UniqueSurfaceKHR {
+  export [[nodiscard]] auto create_surface(
+    GLFWwindow *window, vk::Instance instance
+  ) -> vk::UniqueSurfaceKHR {
     auto *surface = VkSurfaceKHR{};
 
     auto const result =
@@ -51,10 +64,10 @@ namespace lvk::glfw {
     return vk::UniqueSurfaceKHR{surface, instance};
   }
 
-  auto framebuffer_size(GLFWwindow *window) -> glm::ivec2 {
+  export auto framebuffer_size(GLFWwindow *window) -> glm::ivec2 {
     auto size = glm::ivec2{};
     glfwGetFramebufferSize(window, &size.x, &size.y);
 
     return size;
   }
-} // namespace lvk::glfw
+} // namespace framework_module::glfw

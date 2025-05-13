@@ -32,7 +32,9 @@ Checks: >
   -readability-qualified-auto,
   -readability-uppercase-literal-suffix,
   -readability-named-parameter,
-  -misc-non-private-member-variables-in-classes
+  -misc-non-private-member-variables-in-classes,
+  -bugprone-exception-escape,
+  -misc-use-internal-linkage
 WarningsAsErrors: false
 FormatStyle:     file
 CheckOptions:
