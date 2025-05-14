@@ -172,8 +172,8 @@ auto main() -> int {
     m_set_layout_views.push_back(*m_set_layouts.back());
   }
 
-  auto pipeline_layout_ci = vk::PipelineLayoutCreateInfo{};
-  pipeline_layout_ci.setSetLayouts(m_set_layout_views);
+  auto pipeline_layout_ci =
+    vk::PipelineLayoutCreateInfo().setSetLayouts(m_set_layout_views);
   auto m_pipeline_layout =
     app.device->createPipelineLayoutUnique(pipeline_layout_ci);
 
@@ -210,7 +210,7 @@ auto main() -> int {
   auto command_block =
     framework::CommandBlock{*app.device, app.queue, *app.cmd_block_pool};
 
-  auto texture_ci = framework::Texture::CreateInfo{
+  auto texture_info = framework::Texture::CreateInfo{
     .device = *app.device,
     .allocator = app.allocator.get(),
     .queue_family = app.gpu.queue_family,
@@ -218,8 +218,8 @@ auto main() -> int {
     .bitmap = rgby_bitmap_v,
   };
   // use Nearest filtering instead of Linear (interpolation).
-  texture_ci.sampler.setMagFilter(vk::Filter::eNearest);
-  auto texture = framework::Texture(std::move(texture_ci));
+  texture_info.sampler.setMagFilter(vk::Filter::eNearest);
+  auto texture = framework::Texture(std::move(texture_info));
 
   auto use_wireframe = false;
   framework::Transform view_transform{};
