@@ -1,4 +1,4 @@
-project(triangle)
+project(1-triangle)
 
 add_executable(${PROJECT_NAME} main.cpp)
 

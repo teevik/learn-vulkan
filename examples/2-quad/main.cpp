@@ -1,3 +1,4 @@
+#include "imgui.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
@@ -65,47 +66,103 @@ namespace {
   auto create_vertex_buffer(framework::Renderer &app)
     -> framework::vma::Buffer {
     static constexpr auto vertices = std::array{
+      // Vertex{.position = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}},
+      // Vertex{.position = {0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}},
+      // Vertex{.position = {0.0f, 0.5f}, .color = {0.0f, 0.0f, 1.0f}},
       Vertex{.position = {-0.5f, -0.5f}, .color = {1.0f, 0.0f, 0.0f}},
       Vertex{.position = {0.5f, -0.5f}, .color = {0.0f, 1.0f, 0.0f}},
-      Vertex{.position = {0.0f, 0.5f}, .color = {0.0f, 0.0f, 1.0f}},
+      Vertex{.position = {0.5f, 0.5f}, .color = {0.0f, 0.0f, 1.0f}},
+      Vertex{.position = {-0.5f, 0.5f}, .color = {1.0f, 1.0f, 0.0f}},
     };
+
+    static constexpr auto indices = std::array{
+      0u,
+      1u,
+      2u,
+      2u,
+      3u,
+      0u,
+    };
+
+    static constexpr auto vertices_bytes = to_byte_array(vertices);
+    static constexpr auto indices_bytes = to_byte_array(indices);
+
+    static constexpr auto total_bytes =
+      std::array<std::span<std::byte const>, 2>{
+        vertices_bytes,
+        indices_bytes,
+      };
 
     auto const buffer_info = framework::vma::BufferCreateInfo{
       .allocator = app.allocator.get(),
-      .usage = vk::BufferUsageFlagBits::eVertexBuffer,
+      .usage = vk::BufferUsageFlagBits::eVertexBuffer |
+        vk::BufferUsageFlagBits::eIndexBuffer,
       .queue_family = app.gpu.queue_family,
     };
 
-    auto vertex_buffer = framework::vma::create_buffer(
-      buffer_info, framework::vma::BufferMemoryType::Host, sizeof(vertices)
+    auto command_block =
+      framework::CommandBlock{*app.device, app.queue, *app.cmd_block_pool};
+
+    return framework::vma::create_device_buffer(
+      buffer_info, std::move(command_block), total_bytes
     );
-
-    std::memcpy(vertex_buffer.get().mapped, vertices.data(), sizeof(vertices));
-
-    return vertex_buffer;
   }
 } // namespace
 
 auto main() -> int {
+  // TODO(teevik) Configurable
   glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
   auto assets_dir = framework::locate_assets_dir();
-  std::println("Using assaaaets directory: {}", assets_dir.string());
+  std::println("Using assets directory: {}", assets_dir.string());
 
   auto app = framework::Renderer();
-
-  auto shader =
-    create_shader(app, assets_dir / "vert.spv", assets_dir / "frag.spv");
+  auto shader = create_shader(
+    app, assets_dir / "shader.vert.spv", assets_dir / "shader.frag.spv"
+  );
   auto vertex_buffer = create_vertex_buffer(app);
 
-  auto draw =
-    [&app, &shader, &vertex_buffer](vk::CommandBuffer const command_buffer) {
-      shader.bind(command_buffer, app.framebuffer_size);
-      command_buffer.bindVertexBuffers(
-        0, vertex_buffer.get().buffer, vk::DeviceSize{}
-      );
-      command_buffer.draw(3, 1, 0, 0);
-    };
+  auto use_wireframe = false;
+
+  auto draw = [&app, &shader, &vertex_buffer, &use_wireframe](
+                vk::CommandBuffer const command_buffer
+              ) {
+    ImGui::SetNextWindowSize({200.0f, 100.0f}, ImGuiCond_Once);
+    if (ImGui::Begin("Inspect")) {
+      if (ImGui::Checkbox("wireframe", &use_wireframe)) {
+        shader.polygon_mode =
+          use_wireframe ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
+      }
+
+      if (use_wireframe) {
+        auto const &line_width_range = app.gpu.properties.limits.lineWidthRange;
+        ImGui::SetNextItemWidth(100.0f);
+        ImGui::DragFloat(
+          "line width",
+          &shader.line_width,
+          0.25f,
+          line_width_range[0],
+          line_width_range[1]
+        );
+      }
+    }
+    ImGui::End();
+
+    shader.bind(command_buffer, app.framebuffer_size);
+
+    // Single VBO at binding 0 at no offset
+    command_buffer.bindVertexBuffers(
+      0, vertex_buffer.get().buffer, vk::DeviceSize{}
+    );
+
+    // u32 indices after offset of 4 vertices
+    command_buffer.bindIndexBuffer(
+      vertex_buffer.get().buffer, 4 * sizeof(Vertex), vk::IndexType::eUint32
+    );
+
+    // command_buffer.draw(3, 1, 0, 0);
+    command_buffer.drawIndexed(6, 1, 0, 0, 0);
+  };
 
   app.run(draw);
 }

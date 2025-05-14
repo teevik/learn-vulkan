@@ -18,5 +18,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${PROJECT_SOURCE_DIR}/bin>)
 add_subdirectory(ext)
 add_subdirectory(framework)
 
-add_subdirectory(examples/triangle)
-add_subdirectory(examples/quad)
+add_subdirectory(examples/1-triangle)
+add_subdirectory(examples/2-quad)
+add_subdirectory(examples/3-quad_new)

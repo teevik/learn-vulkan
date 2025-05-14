@@ -11,4 +11,7 @@ export import :shader_program;
 export import :window;
 export import :vma;
 export import :swapchain;
+export import :descriptor_buffer;
+export import :texture;
+export import :transform;
 export import :renderer;

@@ -1,4 +1,4 @@
-project(quad)
+project(3-quad_new)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
