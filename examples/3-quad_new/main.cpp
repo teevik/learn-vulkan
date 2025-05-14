@@ -157,9 +157,10 @@ auto main() -> int {
     layout_binding(0, vk::DescriptorType::eCombinedImageSampler),
   };
 
-  auto set_layout_cis = std::array<vk::DescriptorSetLayoutCreateInfo, 2>{};
-  set_layout_cis[0].setBindings(set_0_bindings_v);
-  set_layout_cis[1].setBindings(set_1_bindings_v);
+  auto set_layout_cis = std::array<vk::DescriptorSetLayoutCreateInfo, 2>{
+    vk::DescriptorSetLayoutCreateInfo().setBindings(set_0_bindings_v),
+    vk::DescriptorSetLayoutCreateInfo().setBindings(set_1_bindings_v),
+  };
 
   std::vector<vk::UniqueDescriptorSetLayout> m_set_layouts{};
   std::vector<vk::DescriptorSetLayout> m_set_layout_views{};
